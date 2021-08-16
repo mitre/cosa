@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Manage Test(s) </h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="teststablediv" class="box-body table-responsive">
+                                <table id="systemTestsTable" class="table table-bordered table-hover" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text">Control</th>
+                                            <th class="text">Title</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% systemcontrols.forEach(function(systemcontrol) {  %>
+                                        <tr id="<%= systemcontrol.PK_SECURITY_CONTROL_ID %>">
+                                            <td>
+                                                <%= systemcontrol.NAME %>
+                                            </td>
+                                            <td>
+                                                <%= systemcontrol.TITLE %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                        <div class="box-footer">
+                            <button type="button" class="btn btn-primary" id="add_test_btn" onclick='addTests()'>Add
+                                Test(s)</button>
+                        </div>
+                    </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+        <% include ../partials/footer %>
+        
+        <!-- Confirm Delete Modal.....Prompt: Are You Sure U Want to DELETE this test set?? -->
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <p>Do you want to proceed?</p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" onclick='deleteTests()'>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- modals -->
+        <div class="modal fade" id="testsModal" tabindex="-1" role="dialog" aria-labelledby="testsModalLabel">
+            <div class="modal-dialog" style="width:60%" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="testsModalLabel">Update test(s) for <%= system[0].NAME %></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form
+                        class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                        id="testsForm">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="inputControlName" class="col-sm-2 control-label">Control</label>
+                                <select class="form-control" style="width: 70%" tabindex="1" aria-hidden="true"
+                                    id="inputControlName">
+                                    <% allcontrols.forEach(function(allcontrol) {  %>
+                                    <option value="<%= allcontrol.PK_SECURITY_CONTROL_ID %>">
+                                        <%= allcontrol.NAME %>
+                                    </option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputTests" class="col-sm-2 control-label">Test(s)
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="button" id="btnAdd" class="button-add" value="Add Test">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div style="height:400px;width:95%;overflow:auto;">
+                                    <table class="table table-condensed" id="testsTable">
+                                        <tbody id="testsTableBody">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-primary" id='btnDeleteTests'>Delete Test(s)</button>
+                            <button type="button" class="btn btn-primary" id='btnUpdateTests'>Update Test(s)</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    
+    <script type="text/javascript" src="/static/testTableHelpers.js"></script>
+
+    <script type="text/javascript">     
+
+        $('#admin_treeview').addClass('active');
+        $('#admin_treeview_controls').addClass('active');
+
+        var datatable, controlId;
+        var rowCount = 0;
+
+        // These variables are populated from trusted sources (directly from the database).
+        var methods = '<%= JSON.stringify(methods)%>';
+        var roles = '<%= JSON.stringify(roles)%>';
+        var sources = '<%= JSON.stringify(sources)%>';
+        var systems = '<%= JSON.stringify(systems)%>';
+        var testMethods = '<%= JSON.stringify(testMethods)%>';
+        var categorizations = '<%= JSON.stringify(categorizations)%>';
+
+        datatable = $('#systemTestsTable').DataTable();
+
+        $('#systemTestsTable tbody').on('click', 'tr', function () {
+
+            datatable = $('#systemTestsTable').DataTable();
+
+            var data = datatable.row(this).data();
+            controlId = data.DT_RowId;
+
+            datatable.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+
+          // console.log("View/Edit System: <%= system[0].PK_SYSTEM_ID %> Control: " + controlId);
+
+            $.ajax({
+
+                url: "./<%= system[0].PK_SYSTEM_ID %>/getTestInfo",
+
+                data: {
+
+                    "systemId": "<%= system[0].PK_SYSTEM_ID %>",
+                    "controlId": controlId
+
+                },
+                success: function (testInfo) {
+
+                    if (testInfo.message == 'Success') {
+
+                        $("#sessionForm").trigger("reset");
+
+                        $('#inputControlName').val(testInfo.tests[0].FK_SECURITY_CONTROL_ID)
+
+                        $('#testsTable').empty();
+
+                        // Add each of the tests to the test table.
+                        for (var i = 0; i < testInfo.tests.length; i++) {
+
+                            rowCount = Number(i) + 1;
+
+                            var newRow = addTestRow(methods, roles, sources, systems, testMethods, rowCount, testInfo.tests.length, testInfo.tests[i].CONTROL_ITEM, testInfo.tests[i].DESCRIPTION, testInfo.tests[i].FREQUENCY,
+                                testInfo.tests[i].AUTO_EVIDENCE, testInfo.tests[i].GATHERED_EVIDENCE, testInfo.tests[i].CCI,
+                                testInfo.tests[i].SOURCE_ENV, testInfo.tests[i].TEST_OBJECTIVE, testInfo.tests[i].RECOMMENDED_CORRECTIVE_ACTION);
+
+                            //console.log("Row: " + JSON.stringify(newRow));
+
+                            $('#testsTable').append(newRow);
+
+                            // Set the selected values.
+                            $('#inputTestApplicable' + rowCount).val(testInfo.tests[i].APPLICABLE);
+                            $('#inputTestMethods' + rowCount).val(testInfo.tests[i].FK_PROCEDURE_TYPE_ID);
+                            $('#inputTestRoles' + rowCount).val(testInfo.tests[i].FK_ROLE_ID);
+                            $('#inputTestSourceType' + rowCount).val(testInfo.tests[i].FK_SOURCE_ID);
+                            $('#inputTestTestMethod' + rowCount).val(testInfo.tests[i].FK_TEST_METHOD_ID);
+                            $('#inputTestHybrid' + rowCount).val(testInfo.tests[i].HYBRID);
+                            $('#inputTestRuntimes' + rowCount).val(testInfo.tests[i].RUNTIME_CHECK);
+                            $('#inputTestDepends' + rowCount).val(testInfo.tests[i].DEPENDS_ON_SYSTEM_ID);
+
+                        }
+
+                        $('#testsModal').modal();
+
+                    } else {
+                        alert("Error")
+                    }
+                }, error: function (error) {
+
+                    if (error.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        // handle error
+                        console.log('Error getting test information ' + error);
+                    }
+                }
+            });
+        });
+
+        function addTests() {
+            $("#testsForm").trigger("reset");
+            window.location.replace('../testsetadd/<%= system[0].PK_SYSTEM_ID %>');
+        }
+
+        $("#btnUpdateTests").click(function (event) {
+
+            if ($("#testsForm")[0].checkValidity()) {
+
+              // console.log("Updating tests" + status);
+
+                event.preventDefault();
+
+                var tests = Array();
+
+                $('#testsTable tr ').each(function () {
+
+                    var testcontrolitem = $(this).find('input[name=inputTestControlItems]').val();
+                    var testTitle = $(this).find('input[name=inputTestTitle]').val();
+                    var testdescription = $(this).find('textarea[name=inputTestDescriptions]').val();
+                    var testapplicable = $(this).find('select[name=inputTestApplicable]').val();
+                    var testmethod = $(this).find('select[name=inputTestMethods]').val();
+                    var testfrequency = $(this).find('input[name=inputTestFrequencies]').val();
+                    var testautoevidence = $(this).find('input[name=inputTestAutoEvidence]').val();
+                    var testgatheredevidence = $(this).find('input[name=inputTestGatheredEvidence]').val();
+                    var testrole = $(this).find('select[name=inputTestRoles]').val();
+                    var testruntime = $(this).find('select[name=inputTestRuntimes]').val();
+                    var testdepends = $(this).find('select[name=inputTestDepends]').val();
+                    var testCCI = $(this).find('select[name=inputTestCCI]').val();
+                    var testHybrid = $(this).find('select[name=inputTestHybrid]').val();
+                    var testSourceEnv = $(this).find('select[name=inputTestSourceEnv]').val();
+                    var testSourceType = $(this).find('select[name=inputTestSourceType]').val();
+                    var testMethod = $(this).find('select[name=inputTestMethod]').val();
+                    var testObjectives = $(this).find('textarea[name=inputTestObjectives]').val();
+                    var testActions = $(this).find('textarea[name=inputTestActions]').val();
+
+                    tests.push([testcontrolitem, testTitle, testdescription, testapplicable, testmethod, testfrequency, testautoevidence,
+                        testgatheredevidence, testrole, testruntime, testdepends, testCCI, testHybrid, testSourceEnv,
+                        testSourceType, testMethod, testObjectives, testActions]);
+
+                });
+
+                //console.log("Tests: " + JSON.stringify(tests));
+
+                $.post("./<%= system[0].PK_SYSTEM_ID %>/updateTests", {
+                    "systemId": "<%= system[0].PK_SYSTEM_ID %>",
+                    "controlId": controlId,
+                    "tests": JSON.stringify(tests)
+                },
+                    function (data, status) {
+
+                       // console.log("Updated!!!!" + status);
+                        alert("Updated control tests!");
+                        location.reload();
+
+                    }).fail(function (err) {
+                        if (err.status == '401') {
+                            alert('Unauthorized... ');
+                            window.location.replace('/home');
+                        } else {
+                            alert("Error: " + JSON.stringify(err.responseText))
+                        }
+                    });
+            } else {
+
+                $("#testsForm")[0].reportValidity();
+
+            }
+        });
+
+        $('#btnAdd').on('click', function (e) {
+
+            addTest(methods, roles, sources, systems, testMethods, testsTable, rowCount);
+
+        });
+
+        $("#btnDeleteTests").click(function (event) {
+
+            $('#testsModal').modal('hide');
+            $('#confirm-delete').modal();
+
+        });
+
+        function deleteTests() {
+
+            event.preventDefault();
+
+            $.post("./<%= system[0].PK_SYSTEM_ID %>/deleteTests", {
+                "systemId": "<%= system[0].PK_SYSTEM_ID %>",
+                "controlId": controlId
+            },
+                function (data, status) {
+                    //console.log(data) // 1 record updated
+                   // console.log(status) // success
+                    location.reload();
+                }).fail(function (err) {
+                    if (err.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        alert("Error: " + JSON.stringify(err.responseText))
+                    }
+                });
+        };
+
+    </script>
+</body>
+
+</html>

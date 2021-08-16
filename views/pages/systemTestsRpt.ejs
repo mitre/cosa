@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <h3 style="padding-left: 10px;">All Tests by System/Organization</h3>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-6" id="selectSystem">
+                            <label for="inputSystem" class="control-label">Select a System or Organization</label>
+                            <select class="form-control  select2 select2-hidden-accesible" style="width: 100%" tabindex="1"
+                                aria-hidden="true" id="inputSystem">
+                                <option></option>
+                                <% systems.forEach(function(system) {  %>
+                                <option value="<%= system.PK_SYSTEM_ID %>">
+                                    <%= system.NAME %>
+                                </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div> <!-- end row -->
+
+                    <div class="row" id="systemsDetails">
+                            <div class="col-lg-12">
+                                    <table id="systemsTable" class="table table-condensed">
+                                            <tbody>
+                                                <tr valign="top">
+                                                        <td><h4><b>System Name: </b><span id="sysName"></span></h4></td> 
+                                                        <td><h4><b>Acronym: </b><span id="sysAcro"></span></h4></td> 
+                                                        <td><h4><b>Categorization: </b><span id="sysCat"></span></h4></td> 
+                                                        <td><h4><b>High Value Asset: </b><span id="sysHVA"></span></h4></td> 
+                                                        <td><h4><b>Remote System: </b><span id="sysRemote"></span></h4></td> 
+                                                </tr>
+                                                <tr valign="top">
+                                                        <td colspan="5"><h4><b>System Desc: </b><span id="sysDesc"></span></h4></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                            </div>
+                    </div> <!-- end row -->
+                <hr>
+                <div class="row" id="testDetails" >
+                        <div class="col-lg-12" style="overflow-x: scroll">
+                    <table id="testsTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th class="text">Control</th>
+                                    <th class="text">Control Item</th>
+                                    <th class="text">Baseline</th>
+                                    <th class="text">Control Title</th>
+                                    <th class="text">Manual Procedure</th>
+                                    <th class="text">Inherited From</th>
+                                    <th class="text">Stage Item</th>
+                                    <th class="text">Inheritable</th>
+                                    <th class="text">Manual</th>
+                                    <th class="text">Hybrid</th>
+                                    <th class="text">Scope</th>
+                                    <th class="text">Component</th>
+                                    <th class="text">Product</th>
+                                    <th class="text">Frequency</th>
+                                    <th class="text">Risk Accepted</th>
+                                </tr>
+                            </thead>
+                            <tbody id="testTableBody">
+                                
+                            </tbody>
+                        </table>
+                        </div>
+                </div> <!-- end row -->
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <% include ../partials/footer %>
+    </div>
+    
+    <script type="text/javascript">
+        $("#systemsTable").hide();
+        $('#testsTable').hide();
+
+        $("#inputSystem").change(function (event) {
+            
+            var selectedSystemID = $('#inputSystem :selected').val();
+            
+            if (selectedSystemID != '') {
+                $.ajax({
+                    url: "./getSystemAndTestInfo",
+                    data: {
+                        "systemID": selectedSystemID
+                    },
+                    success: function (data) {
+
+                        if (data.message == 'Success') {
+                            $('#sysName').html(data.info[0].NAME);
+                            $('#sysAcro').html(data.info[0].ACRONYM);
+                            $('#sysCat').html(data.info[0].CATEGORIZATION);
+                            $('#sysDesc').html(data.info[0].DESCRIPTION);
+                            $('#sysHVA').html(data.info[0].HIGH_VALUE_ASSET);
+                            $('#sysRemote').html(data.info[0].IS_REMOTE);
+
+                            $("#systemsDetails").show(); // for systems details for the selected table
+                            $('#testTableBody').html(''); // used to clear table betwen System name changes
+                            for(let i = 0; i < data.tests.length; i++){
+                            var inherited = "";
+                            if(data.tests[i].INHERITED_FROM != null) { 
+                                inherited = data.tests[i].INHERITED_FROM;
+                            }
+                            var testRow = `<tr>
+                            <td>`+data.tests[i].SECURITY_CONTROL_NAME+`</td>
+                            <td>`+data.tests[i].CONTROL_ITEM+`</td>
+                            <td>`+data.tests[i].SECURITY_CONTROL_BASELINE+`</td>
+                            <td>`+data.tests[i].SECURITY_CONTROL_TITLE+`</td>
+                            <td>`+data.tests[i].SECURITY_CONTROL_DESC+`</td>
+                            <td>`+inherited+`</td>
+                            <td>`+data.tests[i].STAGE_NAME+`</td>
+                            <td>`+data.tests[i].IS_INHERITABLE+`</td>
+                            <td>`+data.tests[i].IS_MANUAL+`</td>
+                            <td>`+data.tests[i].IS_HYBRID+`</td>
+                            <td>`+data.tests[i].SCOPE_NAME+`</td>
+                            <td>`+data.tests[i].COMPONENT_TYPE_NAME+`</td>
+                            <td>`+data.tests[i].COMPONENT_PRODUCT_NAME+`</td>
+                            <td>`+data.tests[i].FREQUENCY+`</td>
+                            <td>`+data.tests[i].IS_RISK_ACCEPTED+`</td>
+                            </tr>`;
+                            $('#testTableBody').append(testRow);
+                            }
+                            $("#systemsTable").show();
+                            $('#testsTable').show();
+                        } else {
+                            alert("Error")
+                        }
+                    },
+                    error: function (error) {
+
+                        if (error.status == '401') {
+                            alert('Unauthorized... ');
+                            window.location.replace('/home');
+                        } else {
+                            // handle error
+                            console.log('Error getting System Data ' + error);
+                        }
+                    }
+                });
+            };
+        });
+
+    </script>
+
+</body>
+
+</html>

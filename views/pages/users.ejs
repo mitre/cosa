@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title"><%= config.shortappname %> Users</h3>
+                                <div class="pull-right box-tools">
+
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="userstablediv" class="box-body table-responsive" style="overflow-x: scroll">
+                                <table id="usertable" class="table table-bordered table-hover" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text">First Name</th>
+                                            <th class="text">MI</th>
+                                            <th class="text">Last Name</th>
+                                            <th class="text">Username</th>
+                                            <th class="text">Role</th>
+                                            <th class="text">Last Login</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% users.forEach(function(user) {  %>
+                                        <tr id="<%= user.PK_USER_ID %>">
+                                            <td>
+                                                <%= user.FIRST_NAME %>
+                                            </td>
+                                            <td>
+                                                <%= user.MI %>
+                                            </td>
+                                            <td>
+                                                <%= user.LAST_NAME %>
+                                            </td>
+                                            <td>
+                                                <%= user.USER_NAME %>
+                                            </td>
+                                            <td>
+                                                <%= user.ROLE_NAME %>
+                                            </td>
+                                            <td>
+                                                <%= user.LAST_LOGIN_DATE %>
+                                            </td>
+                                        </tr>
+
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-footer">
+                                <button type="button" class="btn btn-primary" id="add_user_btn"
+                                    onclick='addUserModal()'>Add
+                                    New User</button>
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                    </div>
+                </div>
+
+
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+      
+    <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+    
+    <!-- modals -->
+
+    <div class="modal fade" id="configModal" tabindex="-1" role="dialog" aria-labelledby="configModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="configModalLabel">Add new user</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                    id="addUserForm">
+                    <div class="modal-body">
+                        <div class="form-group flex">
+                            <label for="addUsername" class="control-label">Username</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addUsername"
+                                    placeholder="Between 4 and 45 characters" minlength="4" maxlength="45" required
+                                    data-validation="length" data-validation-length="4-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addPassword" class="control-label">Password</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="addPassword" placeholder="Password"
+                                    minlength="6" maxlength="45" required data-validation="length"
+                                    data-validation-length="6-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addRole" class="control-label">Role</label>
+                            <div class="col-sm-10">
+                                <select class="form-control  select2" style="width: 100%" tabindex="1"
+                                    aria-hidden="true" id="addRole">
+                                    <option>User</option>
+                                    <option>Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addFirstName" class="control-label">First Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addFirstName" minlength="2" maxlength="45"
+                                    placeholder="First name" required data-validation="length"
+                                    data-validation-length="2-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addMI" class="control-label">MI</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addMI" minlength="0" maxlength="1"
+                                    placeholder="Middle initial" required data-validation="length"
+                                    data-validation-length="0-1">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addLastName" class="control-label">Last Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addLastName" minlength="2" maxlength="45"
+                                    placeholder="Last name" required data-validation="length"
+                                    data-validation-length="2-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addEmail" class="control-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addEmail" minlength="7" maxlength="45"
+                                    placeholder="Email address" required data-validation="length"
+                                    data-validation-length="7-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="addPhone" class="control-label">Phone</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="addPhone" minlength="12" maxlength="17"
+                                    placeholder="Phone Number" required data-validation="length"
+                                    data-validation-length="12-17">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id='loadConfig'>Add User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal.....Prompt: Are You Sure U Want to DELETE this User?? -->
+    <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel">Confirm Delete</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Do you want to proceed?</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick='deleteUser()'>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="userModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="userModalLabel">Edit User Account</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                    id="editUserForm">
+                    <div class="modal-body">
+                        <div class="form-group flex">
+                            <label for="inputUsername" class="col-sm-2 control-label">Username</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputUsername"
+                                    placeholder="Between 4 and 45 characters" minlength="4" maxlength="45" required
+                                    data-validation="length" data-validation-length="4-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputPassword" class="col-sm-2 control-label">Password</label>
+                            <div class="col-sm-10">
+                                <input type="password" class="form-control" id="inputPassword" placeholder="Password"
+                                    minlength="6" maxlength="45" required data-validation="length"
+                                    data-validation-length="6-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputRole" class="col-sm-2 control-label">Role</label>
+                            <div class="col-sm-10">
+                                <select class="form-control  select2 select2-hidden-accesible" style="width: 100%"
+                                    tabindex="1" aria-hidden="true" id="inputRole">
+                                    <option>User</option>
+                                    <option>Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputFirstName" class="col-sm-2 control-label">First Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputFirstName" minlength="2" maxlength="45"
+                                    placeholder="First name" required data-validation="length"
+                                    data-validation-length="2-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputMI" class="col-sm-2 control-label">MI</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputMI" minlength="0" maxlength="1"
+                                    placeholder="Middle initial" required data-validation="length"
+                                    data-validation-length="0-1">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputLastName" class="col-sm-2 control-label">Last Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputLastName" minlength="2" maxlength="45"
+                                    placeholder="Last name" required data-validation="length"
+                                    data-validation-length="2-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputEmail" class="col-sm-2 control-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputEmail" minlength="7" maxlength="45"
+                                    placeholder="Email address" required data-validation="length"
+                                    data-validation-length="7-45">
+                            </div>
+                        </div>
+                        <div class="form-group flex">
+                            <label for="inputPhone" class="col-sm-2 control-label">Phone</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputPhone" minlength="12" maxlength="17"
+                                    placeholder="Phone Number" required data-validation="length"
+                                    data-validation-length="12-17">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id='btnDeleteUser'>Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id='btnUpdateUser'>Update</button>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        $('#sidebar-collapse').addClass('show');
+                    $('#admin_users').addClass('active');
+
+        var datatable, userID;
+
+        datatable = $('#usertable').DataTable();
+
+        $('#usertable tbody').on('click', 'tr', function () {
+
+            var data = datatable.row(this).data();
+            userID = data.DT_RowId;
+            datatable.$('tr.selected').removeClass('selected');
+
+            $(this).addClass('selected');
+
+            $.ajax({
+
+                url: "/auth/getUserInfo",
+
+                data: {
+
+                    "userID": userID
+
+                },
+                success: function (userInfo) {
+
+                    if (userInfo.message == 'Success') {
+                        $("#sessionForm").trigger("reset");
+                        $('#inputFirstName').val(userInfo.data[0].FIRST_NAME);
+                        $('#inputMI').val(userInfo.data[0].MI);
+                        $('#inputLastName').val(userInfo.data[0].LAST_NAME);
+                        $('#inputUsername').val(userInfo.data[0].USER_NAME);
+                        $('#inputPassword').val('');
+                        $('#inputRole').val(userInfo.data[0].ROLE_NAME);
+                        $('#inputEmail').val(userInfo.data[0].EMAIL);
+                        $('#inputPhone').val(userInfo.data[0].PHONE);
+
+                        $('#userModal').modal();
+                    } else {
+                        alert("Error")
+                    }
+                },
+                error: function (error) {
+
+                    if (error.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        // handle error
+                        console.log('Error uploading evidence ' + error);
+                    }
+                }
+            });
+        });
+
+        $("#btnUpdateUser").click(function (event) {
+            event.preventDefault();
+            $.post("/auth/updateUser", {
+                "userID": userID,
+                "username": $('#inputUsername').val(),
+                "password": $('#inputPassword').val(),
+                "role": $('#inputRole').val(),
+                "firstName": $('#inputFirstName').val(),
+                "MI": $('#inputMI').val(),
+                "lastName": $('#inputLastName').val(),
+                "email": $('#inputEmail').val(),
+                "phone": $('#inputPhone').val()
+            },
+                function (data, status) {
+                    console.log(data) // 1 record updated
+                    console.log(status) // success
+                    location.reload();
+                }).fail(function (err) {
+                    if (err.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        alert("Error: " + JSON.stringify(err.responseText))
+                    }
+                });
+        });
+
+        $("#btnDeleteUser").click(function (event) {
+            $('#userModal').modal('hide');
+            $('#confirm-delete').modal();
+        });
+
+        function deleteUser() {
+            event.preventDefault();
+
+            $.post("/auth/deleteUser", {
+                "userID": userID
+            },
+                function (data, status) {
+                    console.log(data) // 1 record updated
+                    console.log(status) // success
+                    location.reload();
+                }).fail(function (err) {
+                if (err.status == '401') {
+                    alert('Unauthorized... ');
+                    window.location.replace('/home');
+                } else {
+                    alert("Error: " + JSON.stringify(err.responseText))
+                }
+            });
+        }
+
+        $("#addUserForm").submit(function (event) {
+            event.preventDefault();
+            $.post("/auth/addUser", {
+                "username": $('#addUsername').val(),
+                "password": $('#addPassword').val(),
+                "role": $('#addRole').val(),
+                "firstName": $('#addFirstName').val(),
+                "MI": $('#addMI').val(),
+                "lastName": $('#addLastName').val(),
+                "email": $('#addEmail').val(),
+                "phone": $('#addPhone').val()
+            }).done(function (data) {
+                location.reload();
+            }).fail(function (err) {
+                if (err.status == '401') {
+                    alert('Unauthorized... ');
+                    window.location.replace('/home');
+                } else {
+                    alert("Error: " + JSON.stringify(err.responseText))
+                }
+            });
+        });
+
+        function addUserModal() {
+            $("#addUserForm").trigger("reset");
+            $('#configModal').modal();
+        }
+    </script>
+
+</body>
+
+</html>

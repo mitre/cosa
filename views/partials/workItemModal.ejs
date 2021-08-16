@@ -1,0 +1,292 @@
+<!-- modals -->
+<div class="modal fade" id="workItemModal" tabindex="-1" role="dialog" aria-labelledby="workItemModalLabel">
+    <div class="modal-dialog" style="width:90%" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="workItemModalLabel">Work Item</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body pre-scrollable">
+                <form class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                    id="workItemForm">
+
+                    <table class="table table-condensed">
+                        <tbody>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputSystemName" class="col-sm-2 control-label">Information System: </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputSystemName"
+                                                name="inputSystemName" placeholder="System name" readonly>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputFindingTitle" class="col-sm-2 control-label">Finding Title:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputFindingTitle"
+                                                name="inputFindingTitle" placeholder="Describe finding title">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputControlName" class="col-sm-2 control-label">Control:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputControlName"
+                                                name="inputControlName" placeholder="Control name" readonly>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputFindingDescription" class="col-sm-2 control-label">Finding Description:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" cols="40" id="inputFindingDescription"
+                                                name="inputFindingDescription"
+                                                placeholder="Describe finding(s)"></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputControlDescription" class="col-sm-2 control-label">Control
+                                            Description: </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" class="form-control" cols="40"
+                                                id="inputControlDescription" name="inputControlDescription"
+                                                placeholder="Control Description" readonly></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputWeaknessDescription"
+                                            class="col-sm-2 control-label">Weakness Description:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" cols="40" id="inputWeaknessDescription"
+                                                name="inputWeaknessDescription"
+                                                placeholder="Describe weakness(es)"></textarea>
+                                        </div>
+                                    </div> 
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputControlItem" class="col-sm-2 control-label">Control Item:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputControlItem"
+                                                name="inputControlItem" placeholder="Control item" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label for="inputControlTitle" class="col-sm-2 control-label">Control Title:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputControlTitle"
+                                                name="inputControlTitle" placeholder="Control Title" readonly>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputWeaknessType" class="col-sm-2 control-label">Control Weakness
+                                            Type:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputWeaknessType" name="inputWeaknessType">
+                                                <% weaknesses.forEach(function(weakness) {  %>
+                                                <option value="<%= weakness.PK_CONTROL_WEAKNESS_TYPE_ID %>">
+                                                    <%= weakness.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputControlItemDescription" class="col-sm-2 control-label">Control
+                                            Item Description: </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="5" cols="40" class="form-control"
+                                                id="inputControlItemDescription" name="inputControlItemDescription"
+                                                placeholder="Control Item Description" readonly></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputActionsDescription" class="col-sm-2 control-label">Recommended
+                                            Corrective Action(s):
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" cols="40" id="inputActionsDescription"
+                                                name="inputActionsDescription"
+                                                placeholder="Recommended corrective action(s)"></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputResultDescription" class="col-sm-2 control-label">Result:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" cols="40" id="inputResultDescription"
+                                                name="inputResultDescription"
+                                                placeholder="Description/Reason for result" required></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputBusinessEffect" class="col-sm-2 control-label">Effect on
+                                            Business: </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="3" cols="40" id="inputBusinessEffect"
+                                                name="inputBusinessEffect" placeholder="Effect on business"></textarea>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputRepeatFinding" class="col-sm-2 control-label">Repeat Findings:
+                                        </label>
+                                        <div class="col-sm-6">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputRepeatFinding" name="inputRepeatFinding">
+                                                <option value="0">NO</option>
+                                                <option value="1">YES</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputLikelihoodType" class="col-sm-2 control-label">Likelihood:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputLikelihoodType" name="inputLikelihoodType">
+                                                <% categories.forEach(function(category) {  %>
+                                                <option value="<%= category.PK_CATEGORIZATION_ID %>">
+                                                    <%= category.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+
+                                    <div class="form-group row">
+                                        <label for="inputRepeatFindingCOSAId" class="col-sm-2 control-label">Repeat
+                                            Finding Weakness ID: </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputRepeatFindingCOSAId"
+                                                name="inputRepeatFindingCOSAId"
+                                                placeholder="Repeat Finding COSA ID">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group row">
+                                        <label for="inputImpactType" class="col-sm-2 control-label">Impact: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputImpactType" name="inputImpactType">
+                                                <% categories.forEach(function(category) {  %>
+                                                <option value="<%= category.PK_CATEGORIZATION_ID %>">
+                                                    <%= category.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="box">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Attachments</h3>
+                                    <div class="pull-right box-tools">
+                                    </div>
+                                </div>
+                                <!-- /.box-header -->
+                                <div id="evidenceUploadsdiv" class="box-body table-responsive"
+                                    style="overflow-x: scroll">
+                                    <table id="evidenceUploadsTable" class="table table-bordered table-hover"
+                                        cellspacing="0" width="100%">
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                    <div>
+                                        <input type="file" id="uploadFiles" name="files[]" hidden multiple />
+                                        <label for="uploadFiles" id="upload_btn" class="btn btn-primary">Add Evidence
+                                            Files</label>
+                                        <output id="filelist" />
+                                        <button type="button" class="btn btn-primary" id='btnDownloadFiles'>Download
+                                            Files
+                                        </button>
+                                        <button type="button" class="btn btn-primary" id='btnDeleteFiles'>Delete Files
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputStatus" class="col-sm-2 control-label">Status: </label>
+                        <div class="col-sm-9">
+                            <select class="form-control" style="width: 50%" tabindex="1" aria-hidden="true"
+                                id="inputStatus" name="inputStatus">
+                                <% statuses.forEach(function(status) {  %>
+                                <option value="<%= status.PK_WORK_ITEM_STATUS_ID %>">
+                                    <%= status.NAME %>
+                                </option>
+                                <% }) %>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id='btnUpdateWorkItem'>Update Work Item</button>
+                        <button type="button" class="btn btn-primary" id='btnReturnWorkItem'>Return to Provider</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>

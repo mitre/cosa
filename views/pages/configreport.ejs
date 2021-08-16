@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Server Configuration Settings </h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="configinfodiv" class="box-body table-responsive">
+                                <table class="table table-bordered table-hover" cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Configuration</th>
+                                            <th>Setting</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr>
+                                            <td>Webserver Port: </td>
+                                            <td><%= data.config.port %> </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Current Working Directory: </td>
+                                            <td><%= data.cwd %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>MySQL Host: </td>
+                                            <td><%= data.config.mysql.host %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>MySQL User: </td>
+                                            <td><%= data.config.mysql.user %> </td>
+                                        </tr>
+                                        <tr>
+                                            <td>MySQL Database:</td>
+                                            <td><%= data.config.mysql.database %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>API Server URI: </td>
+                                            <td><%= data.config.rserver.URI %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>RServer SystemName : </td>
+                                            <td><%= data.config.rserver.systemName %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>TOP (where hello world is): </td>
+                                            <td><%= data.config.rserver.top %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Jenkins Build Server URI : </td>
+                                            <td><%= data.config.jenkins_URI %></td>
+                                        </tr>
+                                        <tr>
+                                            <td>COSA GIT Version : </td>
+                                            <td><%= gitVersion %></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <!-- /.box -->
+                            </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+
+    </div>
+    </div>
+    <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+    
+    <script type="text/javascript">
+    $('#sidebar-collapse').addClass('show');
+        $('#configView').addClass('active');
+
+    </script>
+
+</body>
+
+</html>

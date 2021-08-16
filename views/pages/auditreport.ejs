@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row" id="auditOutput">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Audit Report</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="audittablediv" class="box-body table-responsive" style="overflow-x: scroll">
+
+                                <table id="audittable" class="table table-bordered table-hover" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">System</th>
+                                            <th class="text-center">Family</th>
+                                            <th class="text-center">Control</th>
+                                            <th class="text-center">Test</th>
+                                            <th class="text-center">Depends On</th>
+                                            <th class="text-center">Procedure</th>
+                                            <th class="text-center">Status</th>
+                                            <th class="text-center" id="statusDesc">Desc</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- /.box -->
+                        </div>
+                    </div>
+                </div>
+                <!-- end auditOutput div and row-->
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+
+
+        <!-- modals -->
+        <div class="modal fade" id="auditModal" tabindex="-1" role="dialog" aria-labelledby="auditModalLabel">
+            <div class="modal-dialog" style="width:75%" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="workItemModalLabel">Work Item Information</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body pre-scrollable">
+                        <form
+                            class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                            id="auditForm">
+                            <table class="table table-condensed">
+                                <tbody>
+                                    <tr valign="top">
+                                        <td ><h4><b>System: </b><span id="aSystem"></span></h4></td> 
+                                        <td ><h4><b>Role: </b><span id="aRole"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td ><h4><b>Control Name: </b><span id="aControlName"></span></h4></td> 
+                                        <td ><h4><b>Control Item: </b><span id="aControlItem"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td ><h4><b>Procedure: </b><span id="aProcedure"></span></h4></td> 
+                                        <td ><h4><b>Command to Execute: </b><span id="aProcedureCommand"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td ><h4><b>Auto Evidence: </b><span id="aAutoEvidence"></span></h4></td>
+                                        <td ><h4><b>Gathered Evidence: </b><span id="aGatheredEvidence"></span></h4></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td ><h4><b>Action Performed: </b><span id="aActionPerformed"></span></h4></td>
+                                        <td ><h4 id="aStatus"></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td colspan="2"><h4><b>Result Description: </b><span id="aResultDescription"></span></h4></td>
+                                        <td></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td><h4><b>Changed On: </b><span id="aChangedOn"></span></h4></td>
+                                        <td><h4><b>Changed By: </b><span id="aChangedBy"></span></h4></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td ><h4><b>Expiration Date: </b><span id="aExpirationDate"></span></h4></td> 
+                                        <td ><h4><b>Repeat Findings: </b><span id="aRepeatFinding"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td><h4><b>Finding Title: </b><span id="aFindingTitle"></span></h4></td> 
+                                        <td></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td colspan="2"><h4><b>Finding Description: </b><span id="aFindingDesc"></span></h4></td> 
+                                        <td></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td colspan="2"><h4><b>Weakness Description: </b><span id="aWeaknessDesc"></span></h4></td> 
+                                        <td></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td><h4><b>Control Weakness Type: </b><span id="aControlWeaknessType"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td colspan="2"><h4><b>Recommended Corrective Action(s): </b><span id="aRecommendedCorrectiveActions"></span></h4></td> 
+                                        <td></td>
+                                    </tr>
+                                    <tr valign="top">
+                                        <td><h4><b>Effect On Business: </b><span id="aEffectOnBusiness"></span></h4></td> 
+                                        <td><h4><b>Remediation Date: </b><span id="aRemediationDate"></span></h4></td> 
+                                    </tr>
+                                    <tr valign="top">
+                                        <td><h4><b>Likelihood: </b><span id="aLikelihood"></span></h4></td> 
+                                        <td><h4><b>Impact: </b><span id="aImpact"></span></h4></td> 
+                                    </tr>
+                                </tbody>
+                            </table>
+                    </div>
+                    <div class="modal-footer">
+                        <!--<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>-->
+                    </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+
+
+    <script type="text/javascript">
+        $('#sidebar-collapse').addClass('show');
+        $('#my_Audits').addClass('active');
+
+        $("#auditOutput").hide();
+
+        var table;  // default for datatable use
+        var auditId;
+        var rowCount = 0;
+
+        if (table !== null) {
+            $('#audittable').DataTable().destroy();
+            table = null;
+            // empty in case the columns change
+            $('#audittable').empty();
+        }
+        table = $('#audittable').DataTable({
+            ajax: "./buildAuditReportTable",
+            "columns": [
+                { "data": "PK_WORK_ITEM_RESULT_HISTORY_ID", title: "ID" },
+                { "data": "SYSTEM_NAME", title: "System" },
+                { "data": "SECURITY_CONTROL_NAME", title: "Control Name" },
+                { "data": "SYSTEM_CONTROL_TEST_CONTROL_ITEM", title: "Control Item" },
+                { "data": "SYSTEM_ROLES_DEFAULT_NAME", title: "Role" },
+                { "data": "CHANGED_BY", title: "Changed By" },
+                { "data": "PROCEDURE_TYPE_NAME", title: "Procedure" },
+                { "data": "RESULT_DESC", title: "Result Description" },
+                { "data": "WORK_ITEM_STATUS_DEFAULT_NAME", title: "Status" },
+                { "data": "CHANGED_ON", title: "Changed On" },
+                { "data": "EXPIRATION_DATE", title: "Expiration Date" }]
+            ,
+            "columnDefs": [{
+                "targets": [0],
+                "visible": false,
+                "searchable": false
+            },
+            {
+                "targets": [7],
+                "visible": false,
+                "searchable": false
+            },
+            {
+                "targets": [8],
+                "render": function (data) {
+                    var cell = '<span class="label label-default">Unknown</span>';
+                    switch (data) {
+                        case "Pass":
+                            cell = '<span class="label label-success">Passed</span>'
+                            break;
+                        case "Incomplete":
+                            cell = '<span class="label label-warning">Incomplete</span>'
+                            break;
+                        case "Fail":
+                            cell = '<span class="label label-danger">Failed</span>'
+                            break;
+                        case "Risk Accepted":
+                            cell = '<span class="label label-info">Risk Accepted</span>'
+                            break;
+                        default:
+                            cell = '<span class="label label-default">' + data + '</span>'
+                            break;
+                    }
+                    return cell
+                }
+            }]
+        });
+        $("#auditOutput").show()
+
+        // User clicked a row in the audittable table
+        $('#audittable tbody').on('click', 'tr', function () {
+            var dTable = $('#audittable').DataTable();
+            var data = dTable.row(this).data();
+            $('#aSystem').text(data.SYSTEM_NAME);
+            $('#aControlName').text(data.SECURITY_CONTROL_NAME);
+            $('#aControlItem').text(data.SYSTEM_CONTROL_TEST_CONTROL_ITEM);
+            $('#aRole').text(data.SYSTEM_ROLES_DEFAULT_NAME);
+            $('#aProcedure').text(data.PROCEDURE_TYPE_NAME);
+            $('#aProcedureCommand').text(data.PROCEDURE_TYPE_COMMAND_TO_EXECUTE);
+            $('#aAutoEvidence').text(data.AUTO_EVIDENCE);
+            $('#aGatheredEvidence').text(data.GATHERED_EVIDENCE);
+            $('#aActionPerformed').text(data.ACTION_PERFORMED);
+            $('#aResultDescription').text(data.RESULT_DESC);
+            var status = data.WORK_ITEM_STATUS_DEFAULT_NAME;
+            var cell = '<span class="label label-default">Unknown</span>';
+            switch (status) {
+                case "Pass":
+                    cell = '<span class="label label-success">Passed</span>'
+                    break;
+                case "Incomplete":
+                    cell = '<span class="label label-warning">Incomplete</span>'
+                    break;
+                case "Fail":
+                    cell = '<span class="label label-danger">Failed</span>'
+                    break;
+                case "Risk Accepted":
+                    cell = '<span class="label label-info">Risk Accepted</span>'
+                    break;
+                default:
+                    cell = '<span class="label label-default">' + data + '</span>'
+                    break;
+            }
+            $('#aStatus').html("<h4><b>Status :</b>  " + cell + "</h4>");
+            var chgDate = data.CHANGED_ON;
+            if (chgDate == '') {
+                chgDate = "none";
+            } else {
+                chgDate = moment(chgDate).format('MMM D, YYYY');
+            }
+            $('#aChangedOn').text(chgDate);
+            $('#aChangedBy').text(data.CHANGED_BY);
+            var expDate = data.EXPIRATION_DATE;
+            if (expDate == '') {
+                expDate = "none";
+            } else {
+                expDate = moment(expDate).format('MMM D, YYYY');
+            }
+            $('#aExpirationDate').text(expDate);
+            $('#aRepeatFinding').text(data.REPEAT_FINDING);
+            $('#aFindingTitle').text(data.FINDING_TITLE);
+            $('#aFindingDesc').text(data.FINDING_DESCRIPTION);
+            $('#aWeaknessDesc').text(data.WEAKNESS_DESCRIPTION);
+            $('#aControlWeaknessType').text(data.CONTROL_WEAKNESS_TYPE);
+            $('#aRecommendedCorrectiveActions').text(data.RECOMMENDED_CORRECTIVE_ACTIONS);
+            $('#aEffectOnBusiness').text(data.EFFECT_ON_BUSINESS);
+            $('#aLikelihood').text(data.LIKELIHOOD);
+            $('#aImpact').text(data.IMPACT);
+            var remDate = data.REMEDIATION_DATE;
+            if (remDate == '') {
+                remDate = "none";
+            } else {
+                remDate = moment(remDate).format('MMM D, YYYY');
+            }
+            $('#aRemediationDate').text(remDate);
+            $('#auditModal').modal(); // show the detail description for the work_item_result STATUS
+        });
+    </script>
+</body>
+
+</html>

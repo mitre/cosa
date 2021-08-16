@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+  <% include ../partials/head %>
+  <% function plural(n,s) { n = parseInt(n,10); return n + ' ' + ((n != 1)? s + 's' : s); } %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">
+
+    <header class="main-header">
+      <% include ../partials/header %>
+    </header>
+
+    <aside class="main-sidebar">
+      <% include ../partials/sidebar %>
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+
+      <section class="content">
+        <% if (!validSession) { %>
+        <div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <img src="<%= config.logo_uri %>" />
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <!-- <img src="./images/cosa_logo.png" /> -->
+              </div>
+              <form class="form-login" id="form-login" action="/auth/login" method="POST" autocomplete="off">
+                <div class="modal-body">
+                  <div id='badcreds' class="alert alert-danger form-group" hidden>
+                    Incorrect Username or Password
+                  </div>
+                  <div class="form-group">
+                    <input type="text" class="form-control" name="username" id="username" placeholder="Username"
+                      autocomplete="off" required />
+                  </div>
+                  <div class="form-group">
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Password"
+                      autocomplete="off" required />
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
+        <% include ../partials/workItemDescriptionModal %>
+
+        <!-- Main content -->
+        <form id="complianceForm">
+          <div class="box">
+            <div class="box-header with-border">
+              <h3 class="box-title">Current Overall Compliance</h3>
+              <hr>
+
+              <div class="row">
+                <div class="col-lg-2 col-md-6" id="selectSystem">
+                  <label for="inputSystem" class="control-label">Select a System or Organization</label>
+                  <select class="form-control  select2 select2-hidden-accesible" style="width: 100%" tabindex="1"
+                    aria-hidden="true" id="inputSystem">
+                    <option></option>
+                    <% systems.forEach(function(system) {  %>
+                    <option value="<%= system.PK_SYSTEM_ID %>">
+                      <%= system.NAME %>
+                    </option>
+                    <% }) %>
+                  </select>
+                </div>
+
+                <div class="col-lg-2 col-md-6" id="passed_banner">
+                  <div class="box box-success box-solid">
+                    <div class="box-header with-border">
+                      <div class=" text-center">
+                        <h3 id="passedControls">
+                          <%= plural(passedControls+0, 'Control') %>
+                        </h3>
+                        <h3 id="passedTests">
+                          <%= plural(passedTests+0, 'Test') %>
+                        </h3>
+                        <div class="container-fluid">
+                          <div class="row">
+                          <div class="col-xs-1"><i class="fa fa-check-circle fa-3x"></i></div>
+                          <div class="col-xs-11 text-left"><h2>Passed</h2></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="description-block">
+                      <span class="description-text">Passed counts</span>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="col-lg-2 col-md-6" id="incomplete_banner">
+                  <div class="box box-warning box-solid">
+                    <div class="box-header with-border">
+                      <div class="text-center">
+                        <h3 id="incompleteControls">
+                          <%= plural(incompleteControls+0, 'Control') %>
+                        </h3>
+                        <h3 id="incompleteTests">
+                          <%= plural(incompleteTests+0, 'Test') %>
+                        </h3>
+                        <div class="container-fluid">
+                          <div class="row">
+                          <div class="col-xs-1"><i class="fa fa-exclamation-circle fa-2x"></i></div>
+                          <div class="col-xs-11"><h2>Incomplete</h2></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="description-block">
+                      <span class="description-text">Incomplete counts</span>
+                    </div>
+                  </div>
+                </div>
+  
+                <% if (config.riskAccepted.show)  { %> <!-- start config Feature Flag lookup -->
+                <div class="col-lg-2 col-md-6" id="riskAccepted_banner">
+                  <div class="box box-info box-solid">
+                    <div class="box-header with-border">
+                      <div class="text-center">
+                        <h3 id="riskAcceptedControls">
+                          <%= plural(riskAcceptedControlss+0, 'Control') %>
+                        </h3>
+                        <h3 id="riskAcceptedTests">
+                          <%= plural(riskAcceptedTests+0, 'Test') %>
+                        </h3>
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="col-xs-1"><i class="fa fa-thumbs-up fa-3x"></i></div>
+                            <div class="col-xs-11"><h2>Risk Accepted</h2></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="description-block">
+                      <span class="description-text">Risk Accepted counts</span>
+                    </div>
+                  </div>
+                </div>
+                <% } %>  <!-- end config Feature Flag lookup -->
+                <div class="col-lg-2 col-md-6" id="failed_banner">
+                  <div class="box box-danger box-solid">
+                    <div class="box-header with-border">
+                      <div class="text-center">
+                        <h3 id="failedControls">
+                          <%= plural(failedControls+0, 'Control') %>
+                        </h3>
+                        <h3 id="failedTests">
+                          <%= plural(failedTests+0, 'Test') %>
+                        </h3>
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="col-xs-1"><i class="fa fa-times-circle fa-3x"></i></div>
+                            <div class="col-xs-11"><h2>Failed</h2></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="description-block">
+                      <span class="description-text">Failed counts</span>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="col-lg-2 col-md-6" id="total_banner">
+                  <div class="box box-default box-solid">
+                    <div class="box-header with-border">
+                      <div class="text-center">
+                        <h3 id="totalControls">
+                          <%= totalControls %> controls
+                        </h3>
+                        <h3 id="totalTests">
+                          <%= totalTests %> tests
+                        </h3>
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="col-xs-1"><i class="fa fa-bar-chart fa-3x"></i></div>
+                            <div class="col-xs-11"><h2>Total</h2></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="description-block">
+                      <span class="description-text">Total counts</span>
+                    </div>
+                  </div>
+                </div>
+  
+                <div class="col-lg-2 col-md-6" id="manAuto_banner">
+                  <div class="box box-default box-solid">
+                    <div class="box-header with-border">
+                      <div class="text-center">
+                        <span class="info-box-text">Inherited</span>
+                        <span class="info-box-number" id="inheritedTests"><%= inheritedTests %></span>
+                        <span class="info-box-text">Automated</span>
+                        <span class="info-box-number" id="automatedTests"><%= automatedTests %></span>
+                        <span class="info-box-text">Manual</span>
+                        <span class="info-box-number" id="manualTests"><%= manualTests %></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>  
+
+              </div><!-- end row -->
+              
+              <% if (validSession) { %>
+              <div class="row" id="complianceCounters">
+                <div class="col-lg-12">
+                  <div class="nav-tabs-custom" id="chartsDiv">
+                    <ul class="nav nav-tabs">
+                      <li class="nav-item">
+                        <a href="#treemap" class="nav-link active" data-toggle="tab">Controls</a>
+                      </li>
+                      <li class="nav-item">
+                        <a href="#complianceDetails" class="nav-link" data-toggle="tab">Compliance Details</a>
+                      </li>
+                      <% if (config.capabilityMap.show)  { %> <!-- start config Feature Flag lookup -->
+                      <li class="nav-item">
+                        <a href="#subCapabilitiesTreeMap" class="nav-link" data-toggle="tab">Capabilities</a>
+                      </li>
+                      <% } %>  <!-- end config Feature Flag lookup -->
+                    </ul>
+                    <div class="tab-content">
+                      <div class="tab-pane active" id="treemap" style="height:500px;">
+                        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                        <div id="chart_div_area" class="col-lg-12 col-md-12">
+                          <div id="chart_div" style="height:500px; width:600px;"></div>
+                        </div>
+                      </div>
+                      <!-- /.tab-pane -->
+                      <div class="tab-pane" id="complianceDetails">
+                        <% include ../partials/workItemDetailsTable %>
+                      </div>
+                      <!-- /.tab-pane -->
+                      <!-- /.tab-pane -->
+                      <div class="tab-pane" id="subCapabilitiesTreeMap">
+                        <div id="chart_div_area_subcapabilites" class="col-lg-12 col-md-12">
+                          <div id="chart_div_subcapabilites" style="height:500px; width:600px;"></div>
+                        </div>
+                      </div>
+                      <!-- /.tab-pane -->
+                    </div>
+                    <!-- /.tab-content -->
+                  </div>
+                </div>
+                <% } %>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+        </form>
+      </section>
+
+    </div>
+    <% include ../partials/footer %>
+  </div><!-- ./wrapper -->
+  
+
+  <script type="text/javascript" src="/static/workItemDetailsTable.js"></script>
+
+  <script type="text/javascript">
+    function plural(n, s) { n = parseInt(n, 10); return n + ' ' + ((n != 1) ? s + 's' : s); }
+    $('#sidebar_dashboard').addClass("active")
+    $("#systemsOutput").hide();
+    $("#chartsDiv").hide(); // for TreeMap
+
+    var buttonClicked = "xxx"; // default
+
+    // Make sure User is Logged-in
+    <% if (!validSession) { %>
+
+      loginModal();
+
+      function loginModal() {
+        $("#form-login").trigger("reset");
+        $('#loginModal').modal();
+      }
+      $('#loginModal').on('shown.bs.modal', function () {
+        $('#username').focus();
+      });
+     <% } %>
+      var treemapCapData = [];
+      var treemapData = [];
+      $("#inputSystem").change(function (event) {
+        $("#systemsOutput").hide();
+        $("#chartsDiv").hide(); //for treeMap
+        var table = $('#workitemdetailstable').DataTable();
+        table.clear().draw();
+        var systemID;
+        selectedSystemID = $('#inputSystem :selected').val();
+        var selectedSystemName = $('#inputSystem :selected').text();
+
+        if (selectedSystemID != '') {
+
+          $.ajax({
+            url: "./getComplianceCounts",
+            data: {
+              "systemID": selectedSystemID
+            },
+            success: function (info) {
+
+              if (info.message == 'Success') {
+               
+                $('#passedTests').html(plural(info.passedTests, 'Test'));
+                $('#incompleteTests').html(plural(info.incompleteTests, 'Test'));
+                $('#acceptedTests').html(plural(info.acceptedTests, 'Test'));
+                $('#failedTests').html(plural(info.failedTests, 'Test'));
+                $('#riskAcceptedTests').html(plural(info.riskAcceptedTests, 'Test'));
+                $('#automatedTests').html(plural(info.automatedTests, 'Test'));
+                $('#manualTests').html(plural(info.manualTests, 'Test'));
+                $('#inheritedTests').html(plural(info.inheritedTests, 'Test'));
+                $('#totalTests').html(plural(info.totalTests, 'Test'));
+
+                $('#passedControls').html(plural(info.passedControls, 'Control'));
+                $('#failedControls').html(plural(info.failedControls, 'Control'));
+                $('#incompleteControls').html(plural(info.incompleteControls, 'Control'));
+                $('#totalControls').html(plural(info.totalControls, 'Control'));
+
+                loadDetails(selectedSystemID, 'all');
+
+                if (info.total != 0) {
+                  populateControlsTreemap(info); //show treeMap
+                }
+              } else {
+                // put error msg here  -JC
+              }
+            },
+            error: function (error) {
+
+              if (error.status == '401') {
+                alert('Unauthorized... ' + error);
+                window.location.replace('/home');
+              } else {
+                // handle error
+                alert('Compliance counts do not exist for: ' + selectedSystemName);
+                console.log('Compliance counts do not exist for: ' + selectedSystemName + ', ' + error);
+              }
+            }
+          });
+        } else { //end if selectedSystemID != ''
+          $('#passed').text(0);
+          $('#incomplete').text(0);
+          $('#failed').text(0);
+          $('#accepted').text(0);
+          $('#total').text(0);
+        }
+      });
+
+
+    // Redraw the Chart when a User selects a system from the dropdown
+    function populateControlsTreemap(info) {
+
+      var allPass = new Array();
+      var allIncomplete = new Array();
+      var allAcceptable = new Array();
+      var allFail = new Array();
+      $("#chartsDiv").show(); // for treeMap
+      treemapData = [];
+      treemapCapData = [];
+      treemapData.push(["NAME", "PARENT", "TEST_COUNT", "Color"])
+      treemapData.push(["Control Families", null, 0, 1]);
+      for (var i in info.treemap) {
+        treemapData.push([info.treemap[i].NAME, info.treemap[i].PARENT, (info.treemap[i].TEST_COUNT + 1000), info.treemap[i].Color]);
+      }
+      treemapData.push(['colordata', 'Control Families', 1, 1]);
+      treemapData.push(['green', 'colordata', 1, 4]);
+      treemapData.push(['red', 'colordata', 1, 4]);
+      treemapData.push(['grey', 'colordata', 1, 4]);
+      treemapData.push(['blue', 'colordata', 1, 4]);
+
+      treemapData.push(['_green', 'green', 1, 1]);
+      treemapData.push(['_red', 'red', 1, 2]);
+      treemapData.push(['_grey', 'grey', 1, 3]);
+      treemapData.push(['_blue', 'blue', 1, 4]);
+
+      
+      treemapCapData.push(["NAME", "PARENT", "TEST_COUNT", "Color"])
+      treemapCapData.push(["Capabilities", null, 0, 1]);
+      for (var i in info.treemapCap) {
+        treemapCapData.push([info.treemapCap[i].NAME, info.treemapCap[i].PARENT, (info.treemapCap[i].TEST_COUNT + 1000), info.treemapCap[i].Color]);
+      }
+      treemapCapData.push(['colordata', 'Capabilities', 1, 1]);
+      treemapCapData.push(['green', 'colordata', 1, 4]);
+      treemapCapData.push(['red', 'colordata', 1, 4]);
+      treemapCapData.push(['grey', 'colordata', 1, 4]);
+      treemapCapData.push(['blue', 'colordata', 1, 4]);
+
+      treemapCapData.push(['_green', 'green', 1, 1]);
+      treemapCapData.push(['_red', 'red', 1, 2]);
+      treemapCapData.push(['_grey', 'grey', 1, 3]);
+      treemapCapData.push(['_blue', 'blue', 1, 4]);
+
+      google.charts.load('current', {
+        'packages': ['treemap']
+      });
+      google.charts.setOnLoadCallback(function () { drawChart(treemapData); });
+     
+
+    }
+
+    function drawChart(tdata) {
+      for (var i in tdata) {
+        //console.log(tdata[i])
+      }
+      var data = google.visualization.arrayToDataTable(tdata);
+      var tree = new google.visualization.TreeMap(document.getElementById('chart_div'));
+      var container = document.getElementById('chart_div');
+      var observer = new MutationObserver(addColors);
+      observer.observe(container, {
+        childList: true,
+        subtree: true
+      });
+
+      function addColors() {
+        Array.prototype.forEach.call(container.getElementsByTagName('rect'), function (rect) {
+          var op = rect.getAttribute('fill-opacity')
+          if (op != null || op == 0) {
+            rect.setAttribute('fill-opacity', '0');
+          } else {
+            var textElements = rect.nextSibling
+            // console.log(textElements)
+            if (textElements) { //textElements.length > 0) {
+              textElements.textContent
+              if ((textElements.textContent).indexOf('_') > -1) {
+                textElements.textContent = "Test: " + (textElements.textContent).split("_")[1];
+              }
+
+            }
+
+            var code = rect.getAttribute('fill');
+            var color = code;
+            //console.log("color: "+ color)
+            //var colors = ['#009900', '#FF9933', '#80D9FF', '#FF3333'];
+            switch (code) {
+              case '#ff0000':
+                color = "#00a65a"; //green
+                break;
+              case '#ff0002':
+                color = "#dd4b39"; //Red
+                break;
+              case '#ff0004':
+                color = "rgb(0, 192, 239)"; //blue
+                break;
+              case '#ff0006':
+                color = "rgb(255, 255, 0)"; //amber
+                break;
+              default:
+                color = code
+            }
+            rect.setAttribute('fill', color);
+          }
+        });
+      }
+
+      tree.draw(data, {
+        minColor: '#FF0000',
+        midColor: '#FF0003',
+        maxColor: '#FF0006',
+        maxPostDepth: 3,
+        headerHeight: 15,
+        fontColor: 'black',
+        showScale: false,
+        showTooltips: true,
+        width: $('#chart_div_area').width()
+      });
+    }
+    
+    function drawCapChart(tdata) {
+      for (var i in tdata) {
+        //console.log(tdata[i])
+      }
+      var data = google.visualization.arrayToDataTable(tdata);
+      var cTree = new google.visualization.TreeMap(document.getElementById('chart_div_subcapabilites'));
+      var container = document.getElementById('chart_div_subcapabilites');
+      var observer = new MutationObserver(addColors);
+      observer.observe(container, {
+        childList: true,
+        subtree: true
+      });
+
+      function addColors() {
+        Array.prototype.forEach.call(container.getElementsByTagName('rect'), function (rect) {
+          var op = rect.getAttribute('fill-opacity')
+          if (op != null || op == 0) {
+            rect.setAttribute('fill-opacity', '0');
+          } else {
+            var textElements = rect.nextSibling
+            // console.log(textElements)
+            if (textElements) { //textElements.length > 0) {
+              textElements.textContent
+              if ((textElements.textContent).indexOf('_') > -1) {
+                textElements.textContent = (textElements.textContent).split("_")[2];
+              }
+
+            }
+
+            var code = rect.getAttribute('fill');
+            var color = code;
+            //console.log("color: "+ color)
+            //var colors = ['#009900', '#FF9933', '#80D9FF', '#FF3333'];
+            switch (code) {
+              case '#ff0000':
+                color = "#00a65a"; //green
+                break;
+              case '#ff0002':
+                color = "#dd4b39"; //Red
+                break;
+              case '#ff0004':
+                color = "rgb(0, 192, 239)"; //blue
+                break;
+              case '#ff0006':
+                color = "rgb(255, 255, 0)"; //amber
+                break;
+              default:
+                color = code
+            }
+            rect.setAttribute('fill', color);
+          }
+        });
+      }
+
+
+      cTree.draw(data, {
+        minColor: '#FF0000',
+        midColor: '#FF0003',
+        maxColor: '#FF0006',
+        maxPostDepth: 3,
+        headerHeight: 15,
+        fontColor: 'black',
+        showScale: false,
+        showTooltips: true,
+        width: $('#chart_div_area_subcapabilites').width()
+      });
+
+    }
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+      var target = $(e.target).attr("href") // activated tab
+      if(target == "#subCapabilitiesTreeMap"){
+        google.charts.setOnLoadCallback(function () { drawCapChart(treemapCapData); });
+      }else if(target == "#treemap"){
+        google.charts.setOnLoadCallback(function () { drawChart(treemapData); });
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>

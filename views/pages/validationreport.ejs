@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Validation Report </h3>
+                            </div>
+                            <div class="box-body">
+                                This is the list of control items that appear in the source system test set but have no
+                                corresponding
+                                test in the inherited from system. The recommended correction is to add a test to the
+                                inherited from system
+                                for same control item and provide the appropriate check method (manual or automated.)
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="validationtablediv" class="box-body table-responsive">
+                                <table id="validationtable" class="table table-bordered table-hover" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text">Source System</th>
+                                            <th class="text">Control Item</th>
+                                            <th class="text">Inherited From</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% items.forEach(item => {  %>
+                                        <tr id="<%= item.PK_WORK_ITEM_RESULT_HISTORY_ID %>">
+                                            <td>
+                                                <%= item.NAME %>
+                                            </td>
+                                            <td>
+                                                <%= item.CONTROL_ITEM %>
+                                            </td>
+                                            <td>
+                                                <%= item.DEPENDS_ON %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                        <div id="exportarea">
+                            <!--
+                            <button id="export_btn">Export</button>
+-->
+                        </div>
+                    </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+
+        <!-- modals -->
+        <div class="modal fade" id="validationModal" tabindex="-1" role="dialog" aria-labelledby="validationModalLabel">
+            <div class="modal-dialog" style="width:60%" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="validationModalLabel">Work Item Information </h4>
+                    </div>
+                    <form
+                        class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                        id="validationForm">
+                        <div class="modal-body">
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="inputSystemName" class="col-sm-2 control-label">System: </label>
+                                    <div class="col-sm-9">
+                                        <input type="text" class="form-control" id="inputSystemName"
+                                            name="inputSystemName" placeholder="System name" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputControlName" class="col-sm-2 control-label">Control: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputControlName"
+                                        name="inputControlName" placeholder="Control name" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputControlItem" class="col-sm-2 control-label">Control: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputControlItem"
+                                        name="inputControlItem" placeholder="Control item" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputRole" class="col-sm-2 control-label">Role: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputRole" name="inputRole"
+                                        placeholder="Role" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputChangedBy" class="col-sm-2 control-label">Changed by: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputChangedBy" name="inputChangedBy"
+                                        placeholder="Changed by" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputProcedure" class="col-sm-2 control-label">Procedure: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputProcedure" name="inputProcedure"
+                                        placeholder="Procedure" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputResultDescription" class="col-sm-2 control-label">Reason: </label>
+                                <div class="col-sm-9">
+                                    <textarea rows="5" cols="100" id="inputResultDescription"
+                                        name="inputResultDescription" placeholder="Description/Reason for result"
+                                        required></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputStatus" class="col-sm-2 control-label">Status: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputStatus" name="inputStatus"
+                                        placeholder="Status" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputChangedOn" class="col-sm-2 control-label">Changed on: </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputChangedOn" name="inputChangedOn"
+                                        placeholder="Changed on" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputExpirationDate" class="col-sm-2 control-label">Expiration date:
+                                </label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" id="inputExpirationDate"
+                                        name="inputExpirationDate" placeholder="Expiration date" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    </div>
+    <!-- ./wrapper -->
+    <% include ../partials/footer %>
+
+    <script type="text/javascript">
+        $('#sidebar-collapse').addClass('show');
+                    $('#my_ValidationReports').addClass('active');
+
+        var datatable;
+        var validationId;
+        var rowCount = 0;
+
+        datatable = $('#validationtable').DataTable({
+
+            buttons: [
+                // future enablement: see https://datatables.net/reference/button/
+                'excel', 'print', 'colvis',
+                {
+                    extend: 'csv',
+                    text: 'Export all data',
+                    exportOptions: {
+                        modifier: { // means export all, no matter the filter
+                            search: 'none'
+                        }
+                    }
+                }
+            ]
+        });
+
+        // This code does nothing useful yet.
+        var export_btn = $('#export_btn').click(ev => {
+            console.log("Button pressed!");
+            $.ajax({
+
+                url: "./getValidationInfo",
+                cache: false,
+                statusCode: { 404: function () { alert("Ajax Failed. Unable to export"); } },
+
+                data: {
+
+                },
+                success: function (validationInfo) {
+
+
+                    console.log("Returned from getValidationInfo");
+
+                    if (validationInfo.message == 'Success') {
+
+
+                    } else {
+                        alert("Error")
+                    }
+                }
+            }).fail(function (err) {
+                if (err.status == '401') {
+                    alert('Unauthorized... ');
+                    window.location.replace('/home');
+                } else {
+                    alert("Error: " + JSON.stringify(err.responseText))
+                }
+            });
+        });
+
+        if (false) // DISABLED!!!
+            $('#validationtable tbody').on('click', 'tr', function () {
+
+                datatable = $('#validationtable').DataTable();
+
+                var data = datatable.row(this).data();
+                validationId = data.DT_RowId;
+
+                datatable.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+
+                console.log("validationId: " + validationId);
+
+                $.ajax({
+
+                    url: "./getValidationInfo",
+
+                    data: {
+
+                        "validationId": validationId
+
+                    },
+                    success: function (validationInfo) {
+
+                        console.log("Returned from getValidationInfo");
+
+                        if (validationInfo.message == 'Success') {
+
+                            console.log("System Name: " + validationInfo.workitems[0].SYSTEM_NAME);
+
+                            $('#inputSystemName').val(validationInfo.workitems[0].SYSTEM_NAME);
+                            $('#inputControlName').val(validationInfo.workitems[0].SECURITY_CONTROL_NAME);
+                            $('#inputControlItem').val(validationInfo.workitems[0].SYSTEM_CONTROL_TEST_CONTROL_ITEM);
+                            $('#inputRole').val(validationInfo.workitems[0].SYSTEM_ROLES_DEFAULT_NAME);
+                            $('#inputChangedBy').val(validationInfo.workitems[0].CHANGED_BY);
+                            $('#inputProcedure').val(validationInfo.workitems[0].PROCEDURE_TYPE_NAME);
+                            $('#inputResultDescription').val(validationInfo.workitems[0].RESULT_DESC);
+                            $('#inputStatus').val(validationInfo.workitems[0].WORK_ITEM_STATUS_DEFAULT_NAME);
+                            $('#inputChangedOn').val(validationInfo.workitems[0].CHANGED_ON);
+                            $('#inputExpirationDate').val(validationInfo.workitems[0].EXPIRATION_DATE);
+
+                            $('#validationModal').modal();
+
+                        } else {
+                            alert("Error")
+                        }
+                    }
+                });
+            });
+
+    </script>
+
+</body>
+
+</html>

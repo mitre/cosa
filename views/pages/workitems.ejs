@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">All Open Work Items</h3>
+                            </div>
+                            <% include ../partials/workItemsTable %>
+                        </div>
+                        <!-- /.box -->
+                    </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <% include ../partials/workItemModal %>
+    </div>
+
+    <script type="text/javascript" src="/static/workitemHelpers.js"></script>
+
+    <script type="text/javascript">
+
+        $('#sidebar-collapse').addClass('show');
+        $('#admin_work_items').addClass('active');
+
+        var datatable;
+        var workitemId;
+        var workitemRole;
+        var systemName;
+
+        $('#add_work_item_btn').hide();
+        $('#btnReturnWorkItem').hide();
+
+        datatable = $('#workitemstable').DataTable();
+
+        $('#workitemstable tbody').on('click', 'tr', function () {
+
+            datatable = $('#workitemstable').DataTable();
+
+            var data = datatable.row(this).data();
+            workitemId = data.DT_RowId;
+
+            datatable.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+
+            console.log("Work Item ID: " + workitemId);
+
+            $.ajax({
+
+                url: "./getWorkItemResult",
+
+                data: {
+
+                    "workitemId": workitemId
+
+                },
+                success: function (workitem) {
+
+                    if (workitem.message == 'Success') {
+
+                        $("#workItemForm").trigger("reset");
+
+                        // Set the selected values.
+                        $('#inputSystemName').val(workitem.workitems[0].SYSTEM);
+                        $('#inputControlName').val(workitem.workitems[0].CONTROL);
+                        $('#inputControlItem').val(workitem.workitems[0].CONTROL_ITEM);
+                        $('#inputControlTitle').val(workitem.workitems[0].TITLE);
+                        $('#inputControlDescription').val(workitem.workitems[0].CONTROL_DESC);
+                        $('#inputResultDescription').val(workitem.workitems[0].RESULT_DESC);
+                        $('#inputRepeatFinding').val(workitem.workitems[0].REPEAT_FINDING_RAW);
+                        $('#inputRepeatFindingCOSAId').val(workitem.workitems[0].REPEAT_FINDING_COSA_WEAKNESS_ID);
+                        $('#inputFindingTitle').val(workitem.workitems[0].FINDING_TITLE);
+                        $('#inputFindingDescription').val(workitem.workitems[0].FINDING_DESCRIPTION);
+                        $('#inputWeaknessDescription').val(workitem.workitems[0].WEAKNESS_DESCRIPTION);
+                        $('#inputWeaknessType').val(workitem.workitems[0].FK_CONTROL_WEAKNESS_TYPE_ID);
+                        $('#inputActionsDescription').val(workitem.workitems[0].RECOMMENDED_CORRECTIVE_ACTIONS);
+                        $('#inputBusinessEffect').val(workitem.workitems[0].EFFECT_ON_BUSINESS);
+                        $('#inputLikelihoodType').val(workitem.workitems[0].FK_LIKELIHOOD_ID);
+                        $('#inputImpactType').val(workitem.workitems[0].FK_IMPACT_ID);
+                        $('#inputStatus').val(workitem.workitems[0].FK_WORK_ITEM_STATUS_ID);
+
+                        systemName = workitem.workitems[0].SYSTEM;
+                        workitemRole = workitem.workitems[0].FORWARD_TO_ROLE_ID;
+
+                        $('#workItemModal').modal();
+
+                        $.ajax({
+                            url: "./getEvidenceUploadFilenames",
+                            data: {
+                                "systemName": systemName,
+                                "workitemId": workitemId
+                            },
+                            success: function (evidenceUploads) {
+
+                                if (evidenceUploads.message == 'Success') {
+
+                                    evidence_dataTable.clear().draw();
+                                    evidence_dataTable.rows.add(evidenceUploads.filenames); // Add new data
+                                    evidence_dataTable.columns.adjust().draw(); // Redraw the DataTable
+
+                                } else {
+
+                                    console.log("Error: " + evidenceUploads.message);
+
+                                }
+                            },
+                            error: function (error) {
+
+                                console.log(error);
+
+                                if (error.status == '401') {
+                                    alert('Unauthorized... ');
+                                    window.location.replace('/home');
+                                } else {
+                                    // handle error
+                                    console.log('Error finding uploaded evidence ' + error);
+                                }
+                            },
+                        });
+
+                        $('#btnDeleteFiles').hide();
+                        $('#btnDownloadFiles').hide();
+
+                    } else {
+
+                        alert("Error " + workitem.message);
+
+                    }
+                },
+                error: function (error) {
+
+                    console.log(error);
+
+                    if (error.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        // handle error
+                        console.log('Error finding uploaded evidence ' + error);
+                    }
+                }
+            });
+        });
+
+        $("#btnUpdateWorkItem").click(function (event) {
+
+            if ($("#workItemForm")[0].checkValidity()) {
+
+                var resultDescription = $(workItemForm).find('textarea[name=inputResultDescription]').val();
+                var repeatFinding = $(workItemForm).find('select[name=inputRepeatFinding]').val();
+                var repeatFindingCOSA = $(workItemForm).find('input[name=inputRepeatFindingCOSAId]').val();
+                var findingTitle = $(workItemForm).find('input[name=inputFindingTitle]').val();
+                var findingDescription = $(workItemForm).find('textarea[name=inputFindingDescription]').val();
+                var weaknessDescription = $(workItemForm).find('textarea[name=inputWeaknessDescription]').val();
+                var weaknessType = $(workItemForm).find('select[name=inputWeaknessType]').val();
+                var actionsDescription = $(workItemForm).find('textarea[name=inputActionsDescription]').val();
+                var businessEffect = $(workItemForm).find('textarea[name=inputBusinessEffect]').val();
+                var likelihood = $(workItemForm).find('select[name=inputLikelihoodType]').val();
+                var impact = $(workItemForm).find('select[name=inputImpactType]').val();
+                var newStatus = $(workItemForm).find('select[name=inputStatus]').val();
+
+                event.preventDefault();
+
+                var files = document.getElementById('uploadFiles').files;
+                var fileStrings = {};
+
+                var formData = new FormData();
+
+                formData.append('systemName', systemName);
+                formData.append('workitemId', workitemId);
+
+                for (var i = 0, f; f = files[i]; i++) {
+
+                    fileStrings[i] = f.name;
+
+                    // Add the file to the request
+                    formData.append('files[]', f, f.name);
+
+                }
+
+                $.ajax({
+
+                    type: "POST",
+                    url: "./uploadEvidenceFiles",
+                    xhr: function () {
+
+                        var myXhr = $.ajaxSettings.xhr();
+                        return myXhr;
+
+                    },
+                    success: function (data) {
+
+                        // your callback here
+                        console.log('Success uploading evidence.');
+
+                        $.post('./updateWorkItemResult', {
+
+                            "workitemId": workitemId,
+                            "resultDescription": resultDescription,
+                            "repeatFinding": repeatFinding,
+                            "repeatFindingCOSA": repeatFindingCOSA,
+                            "findingDescription": findingDescription,
+                            "weaknessDescription": weaknessDescription,
+                            "weaknessType": weaknessType,
+                            "actionsDescription": actionsDescription,
+                            "businessEffect": businessEffect,
+                            "likelihood": likelihood,
+                            "impact": impact,
+                            "newStatus": newStatus
+
+                        },
+                            function (data, status) {
+
+                                if (data == "Success") {
+
+                                    console.log(data) // 1 record updated
+                                    console.log("Updated!!!!" + status);
+                                    alert("Updated work item!");
+
+                                    location.reload();
+
+                                } else {
+
+                                    alert("Something went wrong.");
+
+                                }
+                            });
+                    },
+                    error: function (error) {
+
+                        if (error.status == '401') {
+                            alert('Unauthorized... ');
+                            window.location.replace('/home');
+                        } else {
+                            // handle error
+                            console.log('Error uploading evidence ' + error);
+                        }
+                    },
+                    async: true,
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    timeout: 60000
+
+                });
+
+            } else {
+
+                $("#workItemForm")[0].reportValidity();
+
+            }
+        });
+
+        function addWorkItem() {
+
+            window.location.replace('workitemCreate');
+
+        }
+
+    </script>
+</body>
+
+</html>

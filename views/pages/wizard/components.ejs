@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+
+        <div class="wizard-window">
+            <div>
+                <div class="pull-left">
+                    <h3>Active Components</h3>
+                </div>
+                <div class="pull-right">
+                    <button type="button" class="btn btn-info btn-sm" id="addComponentModalBtn">
+                        Add Component
+                    </button>
+                </div>
+            </div>
+            <table id="componentsTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="text">ID</th>
+                        <th class="text">Type</th>
+                        <th class="text">Product</th>
+                        <th class="text">Description</th>
+                        <th class="text">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+
+
+            <div class="form-nav-buttons">
+
+                <button type="button" class="btn btn-primary" onclick="location.href='./systemReview'">Back</button>
+                <button type="button" class="btn btn-primary"
+                    onclick="location.href='./testApplicability'">Next</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="modal fade" id="addComponentModal" tabindex="-1" role="dialog" aria-labelledby="addComponentModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addComponentModalLabel">Add Component</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+
+
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="control-label">Component Type</label>
+                                    <div>
+                                        <select class="form-control" id="selectComponentType"
+                                            name="selectComponentType">
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="control-label">Component Product</label>
+                                    <div>
+                                        <select class="form-control" id="selectComponentTypeProduct"
+                                            name="selectComponentTypeProduct">
+                                            <option>Select Component Type</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="control-label">Description</label>
+                                    <div>
+                                        <p id="selectComponentDescription"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addComponentBtn">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <% include ../../partials/footer %>
+ 
+
+    <script type="text/javascript">
+
+        jQuery.fn.dataTable.render.ellipsis = function (cutoff, wordbreak, escapeHtml) {
+            var esc = function (t) {
+                return t
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;');
+            };
+            return function (d, type, row) {
+                if (type !== 'display') {
+                    return d;
+                }
+                if (typeof d !== 'number' && typeof d !== 'string') {
+                    return d;
+                }
+                d = d.toString();
+                if (d.length <= cutoff) {
+                    return d;
+                }
+                var shortened = d.substr(0, cutoff - 1);
+                if (wordbreak) {
+                    shortened = shortened.replace(/\s([^\s]*)$/, '');
+                }
+                if (escapeHtml) {
+                    shortened = esc(shortened);
+                }
+                return '<span class="ellipsis" title="' + esc(d) + '">' + shortened + '&#8230;</span>';
+            };
+        };
+
+
+        var cTable = $('#componentsTable').DataTable({
+            "ajax": {
+                "type": "GET",
+                "url": "/wizard/API/componentActiveSystemComponents",
+                "dataSrc": function (data) {
+                    console.log(JSON.stringify(data))
+                    return data;
+                }
+            },
+            "columns": [
+                { "data": "PK_COMPONENT_ID" },
+                { "data": "COMPONENT_TYPE" },
+                { "data": "COMPONENT_PRODUCT" },
+                { "data": "DESCRIPTION" },
+                { "data": null }
+            ],
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+                {
+                    "targets": [3],
+                    "render": $.fn.dataTable.render.ellipsis(20)
+                },
+                {
+                    "targets": [4],
+                    "searchable": false,
+                    "data": null,
+                    "defaultContent": "<button type='button' class='btn btn-danger btn-sm dt-remove'>Remove</button>"
+                }
+
+            ],
+            "aaSorting": [],// Disable initial sort 
+            "fnDrawCallback": function (settings, json) {
+                $('.dt-remove').each(function () {
+                    $(this).on('click', function (evt) {
+                        var data = cTable.row(this.closest('tr')).data();
+                        var cId = data.PK_COMPONENT_ID;
+                        $.ajax({
+                            url: "/wizard/API/componentRemove",
+                            data: {
+                                "componentId": cId
+                            },
+                            type: 'POST',
+                            success: function (data) {
+                                cTable.ajax.reload(null, false);
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                console.log("Something Went Wrong");
+                            }
+                        });
+                    });
+                })
+            }
+        });
+
+        $("#selectComponentType").change(function () {
+            $("#selectComponentTypeProduct").empty();
+            $("#selectComponentTypeProduct").append("<option>Loading Options....</option>");
+            $('#selectComponentDescription').html('')
+            $.getJSON('/wizard/API/componentTypeProducts?componentTypeId=' + $(this).val(), function (products) {
+                $("#selectComponentTypeProduct").empty();
+
+                if (products.length > 0) {
+                    $("#selectComponentTypeProduct").append("<option></option>");
+                    $.each(products, function (i, p) {
+                        $("#selectComponentTypeProduct").append("<option value='" + p.PK_COMPONENT_PRODUCT_DEFAULT_ID + "' data-description='" + p.DESCRIPTION + "'>" + p.COMPONENT_PRODUCT + "</option>");
+                    });
+                } else {
+                    $("#selectComponentTypeProduct").append("<option>No Applicable Components</option>");
+                }
+            });
+        });
+
+        $("#selectComponentTypeProduct").change(function () {
+            $('#selectComponentDescription').html($(this).find('option:selected').data('description'))
+        });
+
+        $("#addComponentBtn").click(function () {
+
+            let data = {
+                "componentTypeId": $('#selectComponentType').val(),
+                "componentProductId": $('#selectComponentTypeProduct').val(),
+                "componentDescription": $('#selectComponentDescription').val()
+            };
+
+            $.post('/wizard/API/componentAdd', data, function (res) {
+                $('#addComponentModal').modal('hide');
+                $("#selectComponentType").val('0').change();
+                cTable.ajax.reload(null, false);
+
+            })
+        });
+
+        $('#addComponentModalBtn').click(function () {
+            $("#selectComponentType").empty();
+            $("#selectComponentTypeProducts").empty();
+            $("#selectComponentTypeProducts").append("<option>Select A Component Type</option>");
+            $.getJSON('/wizard/API/componentTypesAvailable', function (types) {
+
+                if (types.length > 0) {
+
+                    $("#selectComponentType").append("<option>--Available Components--</option>");
+                    $.each(types, function (i, p) {
+
+                        $("#selectComponentType").append("<option value='" + p.PK_COMPONENT_TYPE_DEFAULT_ID + "'>" + p.COMPONENT_TYPE + "</option>");
+                    });
+                } else {
+                    $("#selectComponentType").append("<option>No Available Components</option>");
+                }
+
+                $('#addComponentModal').modal();
+            });
+        });
+
+
+    </script>
+
+</body>
+
+</html>

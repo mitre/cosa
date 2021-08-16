@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">WARNING: The button below is only for demonstration of POC capabilities.</h3>
+                                <div class="pull-right box-tools">
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box box-danger" class="col-xs-6">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Database Management</h3>
+                                </div>
+                                <div id="db-btn-group" class="box-body">                                    
+                                    <div class="row">       
+                                         <div class="col-xs-3">
+                                            <button type="button" class="btn btn-danger" id="runJenkins_btn">Run Jenkins
+                                            </button>
+                                        </div>
+                                    </div> <!-- end row 2 -->
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+
+    <script type="text/javascript">
+        $('#sidebar-collapse').addClass('show');
+        $('#admin_demo').addClass('active');
+
+        //working here
+        $("#runJenkins_btn").click(function (event) {
+            var URI = "<%=config.jenkins_URI%>"
+            var target = URI
+            confirm("Contacting Jenkins Server")
+            $.post({
+                method: "POST",
+                url: target,
+                success: function (data, status) { // success function
+                    // console.log(data)
+                    console.log(status) // success
+                    location.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    if (textStatus == 401) { // Need to add code to return 401 from this URI.
+                        alert('Not authorized...');
+                        window.location.replace('/home');
+                    } else {
+                        confirm("Failed to contact Jenkins server");
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        function navigateHome() {
+            window.location.replace('/home');
+        }
+    </script>
+
+</body>
+
+</html>

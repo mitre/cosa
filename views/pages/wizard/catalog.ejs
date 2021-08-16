@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+        <% include ../../partials/wizardProgressSteps %>
+        <div class="wizard-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h3>Select Catalog</h3>
+            <p>Select a catalog for <b><%= systemAcronym %></b>.  A catalog provides a set of security and privacy controls. This information can be reviewed and updated later.
+            </p>
+          </div>
+
+        <div class="wizard-window">
+            <form id="catalog-form">
+
+                <!--<h3>Select Catalog</h3>-->
+                <button id="checkAll" class="config-select btn btn-primary" type="button">Select All</button>
+                <button id="uncheckAll" class="config-select btn btn-primary" type="button">Deselect All</button>
+                <hr>
+                <ul>
+
+                    <% catalogs.forEach(cat => { %>
+                    <li class="form-check">
+                        <% if (cat.ACTIVE) { %>
+                        <input type="checkbox" class="form-check-input" name="catalog" checked
+                            value="<%= cat.PK_CATALOG_DEFAULT_ID %>">
+                        <% } else { %>
+                        <input type="checkbox" class="form-check-input" name="catalog"
+                            value="<%= cat.PK_CATALOG_DEFAULT_ID %>">
+                        <% } %>
+                        <label class="form-check-label" for="catalog-checkbox"><%= cat.NAME %></label>
+                    </li>
+                    <% }); %>
+
+                </ul>
+
+                <div class="form-nav-buttons">
+                    <button type="button" class="btn btn-primary" onclick="navigateBack('addSystem')">Back</button>
+                    <button type="submit" class="btn btn-primary">Next</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+
+        <% include ../../partials/footer %>
+
+
+    <script type="text/javascript" async="true">
+
+        var cats;
+
+        $(document).ready(function () {
+
+            $("#wizardProgressBar  > li:lt(2)").addClass("active");
+            
+            var form = $('#catalog-form');
+            //form.validate();
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                if (form.valid()) {
+
+                    cats =  Array();
+                    var atleastOneSelected = false;
+
+                    $.each($("input[name='catalog']:checked"), function () {
+                        let JSONcatalog = {};
+
+                        JSONcatalog.PK_CATALOG_DEFAULT_ID = $(this).val();
+                        JSONcatalog.ACTIVE = true;
+                        cats.push(JSONcatalog);
+                        atleastOneSelected = true;
+                    });
+                    $.each($("input[name='catalog']:unchecked"), function () {
+                        let JSONcatalog = {};
+
+                        JSONcatalog.PK_CATALOG_DEFAULT_ID = $(this).val();
+                        JSONcatalog.ACTIVE = false;
+                        cats.push(JSONcatalog);
+                    }); 
+                    if(atleastOneSelected){
+                        sendForm(cats);
+                    } else {
+                        alert("No Catalogs selected. Must Select at least one Catalog.")
+                    }
+                } else {
+                    console.log('form incomplete');
+                }
+            });
+
+            $("#checkAll").click(function () {
+                console.log('check all');
+                $('.form-check-input').prop('checked', true);
+            });
+            $("#uncheckAll").click(function () {
+                $('.form-check-input').prop('checked', false);
+            });
+
+            function sendForm(catalogList) {
+                
+                $.post('/catalogsInfoNext/catalogsInfoNext', {
+                    "catalogs": JSON.stringify(catalogList)
+                    }, 
+                    function (data) {
+                        if (data.message == 'Success') {
+                        window.location = '/wizard/inheritance';
+                    } else {
+                        console.log('Server: error sending form');
+                    }
+                }).fail(function(err){
+                    console.log(err.responseText);
+                })
+            }
+        });
+
+    </script>

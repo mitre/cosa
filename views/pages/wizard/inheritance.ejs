@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+        <% include ../../partials/wizardProgressSteps %>
+        <div class="wizard-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h3>Select Inheritance</h3>
+            <p>Select control providers for <b><%= systemAcronym %></b> to inherit from. This information can be reviewed and updated later.</p>
+          </div>
+
+        <div class="wizard-window">
+            <form id="catalog-form">
+
+                <!--<h3>Select Inheritance</h3>-->
+                <button id="checkAll" class="config-select btn btn-primary" type="button">Select All</button>
+                <button id="uncheckAll" class="config-select btn btn-primary" type="button">Deselect All</button>
+                <hr>
+                <ul>
+
+                    <% inheritances.forEach(inherit => { %>
+                    <li class="form-check">
+                        <% if (inherit.ACTIVE) { %>
+                        <input type="checkbox" class="form-check-input" name="inheritance" checked
+                            value="<%= inherit.PK_SYSTEM_ID %>">
+                            <div><span id="<%= inherit.PK_SYSTEM_ID %>MsgBox" style="display: block; float:left;"></span></div>
+                        <% } else { %>
+                        <input type="checkbox" class="form-check-input" name="inheritance"
+                            value="<%= inherit.PK_SYSTEM_ID %>">
+                            <div><span id="<%= inherit.PK_SYSTEM_ID %>MsgBox" style="display: block; float:left;"></span></div>
+                        <% } %>
+                        <label title="<%=inherit.DESCRIPTION%>" class="form-check-label" for="catalog-checkbox"><%= inherit.NAME %></label>
+                    </li>
+                    <% }); %>
+
+                </ul>
+
+                <div class="form-nav-buttons">
+                    <button type="button" class="btn btn-primary" onclick="navigateBack('catalog')">Back</button>
+                    <button type="submit" class="btn btn-primary">Next</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+        <% include ../../partials/footer %>
+
+    <script type="text/javascript" async="true">
+
+        $(document).ready(function () {
+
+            $("#wizardProgressBar  > li:lt(3)").addClass("active");
+            var form = $('#catalog-form');
+            //form.validate();
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                if (form.valid()) {
+                    var inheritances = [];
+
+                    $.each($("input[name='inheritance']:checked"), function () {
+                        let JSONinherit = {};
+
+                        JSONinherit.DEPENDS_ON_SYSTEM_ID = $(this).val();
+                        JSONinherit.ACTIVE = true;
+                        inheritances.push(JSONinherit);
+                    });
+                    $.each($("input[name='inheritance']:unchecked"), function () {
+                        let JSONinherit = {};
+
+                        JSONinherit.DEPENDS_ON_SYSTEM_ID = $(this).val();
+                        JSONinherit.ACTIVE = false;
+                        inheritances.push(JSONinherit);
+                    });
+                    console.log("The Inheritances selected: " + JSON.stringify(inheritances));
+                    sendForm(inheritances);
+                } else {
+                    console.log('form incomplete');
+                }
+            });
+
+            $("#checkAll").click(function () {
+                console.log('check all');
+                $('.form-check-input').prop('checked', true);
+            });
+            $("#uncheckAll").click(function () {
+                $('.form-check-input').prop('checked', false);
+            });
+
+            function sendForm(inheritanceList) {
+
+                $.post('/inheritancesInfoNext/inheritancesInfoNext', {
+                    "inheritances": JSON.stringify(inheritanceList)
+                },
+                    function (data) {
+                        if (data.message == 'Success') {
+                            window.location = '/wizard/componentsBasic';
+                        } else {
+                            console.log('Server: error sending form');
+                        }
+                    })
+            }
+        });
+
+        function showMsg(elementName, msg){
+            $("#"+elementName).text(msg);
+            $("#"+elementName).show(); 
+        } 
+        function hideMsg(elementName){
+            $("#"+elementName).hide(); 
+        }  
+
+    </script>

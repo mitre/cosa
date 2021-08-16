@@ -1,0 +1,6 @@
+{
+    "ignore" : ["public","logs"],
+    "ext" : "js,ejs,ts",
+    "watch" : ["./views","./routes",
+                "./bin", "./scripts/"]
+}

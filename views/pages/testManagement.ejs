@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+    <style>
+        .fixedCol {
+            background-color: #F1F1F1 !important;
+        }
+    </style>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Manage Tests For <%=systemName%></h3>
+                                <div class="pull-right box-tools">
+                                    <h5 id="updateStatus"></h5>
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="teststablediv" class="box-body table-responsive" style="overflow-x: scroll">
+                                <table id="teststable" class="table table-hover table-bordered nowrap hover"
+                                    cellspacing="0" width="100%">
+                                    <thead>
+                                        <tr>
+                                            <!--th class="text"></th-->
+                                            <th class="text" bgcolor="#F1F1F1">Test ID</th>
+                                            <th class="text" bgcolor="#F1F1F1">Procedure Name</th>
+                                            <th class="text" bgcolor="#F1F1F1">Test Name</th>
+                                            <th class="text">Control</th>
+                                            <th class="text">Test Title</th>
+                                            <th class="text">Frequency</th>
+                                            <th class="text">Auto Evidence</th>
+                                            <th class="text">Gathered Evidence</th>
+                                            <th class="text">Depends On</th>
+                                            <th class="text">CCI</th>
+                                            <th class="text">Source Env</th>
+                                            <th class="text">Test Methods</th>
+                                            <th class="text">Component</th>
+                                            <th class="text">Scope</th>
+                                            <th class="text">Catalog</th>
+                                            <th class="text">Stage</th>
+                                            <th class="text">Test Categorization</th>
+                                            <th class="text">Runtime Check</th>
+                                            <th class="text">Applicable</th>
+                                            <th class="text">Hybrid</th>
+                                            <th class="text">Inheritable</th>
+                                            <th class="text">Manual</th>
+                                            <th class="text">Risk Accepted</th>
+                                            <th class="text">PII Only</th>
+                                            <th class="text">Item Desc</th>
+                                            <th class="text">Test Objective</th>
+                                            <th class="text">Recommended Corrective Action(s)</th>
+                                            <th class="text">Rationale</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <!-- /.box-body -->
+                            <div class="box-footer">
+                                <button type="button" class="btn btn-primary" id="btnAddTest" onclick='addTest'>Add Test</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box -->
+                </div>
+            </section>
+        </div>
+        <% include ../partials/footer %>
+    </div>
+    
+    <script type="text/javascript">
+    var systemID = "<%=systemId%>";
+
+        $('#sidebar-collapse').addClass('show');
+        $('#manage_all_tests').addClass('active');
+
+        var datatable = $('#teststable').DataTable({
+            ajax: "/testsets/API/getAllSystemTests/<%=systemId%>",
+
+            rowId: 'PK_SYSTEM_CONTROL_TEST_ID',
+            columns: [
+                { "data": "PK_SYSTEM_CONTROL_TEST_ID" }, // 0
+                { "data": "FK_PROCEDURE_TYPE_ID" }, // 1
+                { "data": "CONTROL_ITEM" }, //2
+                { "data": "FK_SECURITY_CONTROL_ID" }, // 3
+                { "data": "TEST_TITLE" }, //4
+                { "data": "FREQUENCY" }, // 5
+                { "data": "AUTO_EVIDENCE" }, // 6
+                { "data": "GATHERED_EVIDENCE" }, // 7
+                { "data": "DEPENDS_ON_SYSTEM_ID" }, // 8
+                { "data": "CCI" }, // 9
+                { "data": "FK_SOURCE_ID" }, // 10
+                { "data": "FK_TEST_METHOD_ID" }, // 11
+                { "data": "FK_COMPONENT_ID" }, // 12
+                { "data": "SCOPE_NAME" }, // 13
+                { "data": "FK_CATALOG_ID" }, // 14
+                { "data": "FK_STAGE_ID" }, // 15
+                { "data": "TEST_FK_CATEGORIZATION_ID" }, // 16
+                { "data": "RUNTIME_CHECK" }, // 17
+                { "data": "APPLICABLE" }, // 18
+                { "data": "HYBRID" }, // 19
+                { "data": "INHERITABLE" }, // 20
+                { "data": "MANUAL" }, // 21
+                { "data": "RISK_ACCEPTED" }, // 22
+                { "data": "PII_ONLY" }, // 23
+                { "data": "ITEM_DESC" }, // 24
+                { "data": "TEST_OBJECTIVE" }, // 25
+                { "data": "RECOMMENDED_CORRECTIVE_ACTION" }, // 26
+                { "data": "RATIONALE" } // 27
+            ],
+            columnDefs: [{
+                "targets": [0],
+                "className": "fixedCol"
+            }, {
+                "targets": [1],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="procedureOption">')
+                        //<% options_procedures.forEach(function(procedure) {  %>
+                        $select.append('<option value="<%=procedure.PK_SYSTEM_CONTROL_TEST_PROCEDURE_TYPE_ID%>"><%=procedure.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [2],
+                "className": "fixedCol",
+                "render": function (data, type, row, meta) {
+                    return '<input type="text" class="testNameText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [3],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="controlOption">')
+                        //<% options_controls.forEach(function(control) {  %>
+                        $select.append('<option title="<%=control.TITLE%>" value="<%=control.PK_SECURITY_CONTROL_ID%>"><%=control.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [4],
+                "render": function (data, type, row, meta) {
+                    console.log("TEST_TITLE " + data);
+                    return '<input type="text" class="titleText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [5],
+                "render": function (data, type, row, meta) {
+                    return '<input type="text" class="frequencyText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [6],
+                "render": function (data, type, row, meta) {
+                    return '<input type="text" class="autoEvidenceText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [7],
+                "render": function (data, type, row, meta) {
+                    return '<input type="text" class="gatheredEvidenceText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [8],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="dependsOnOption">')
+                        //<% options_allSystems.forEach(function(allSystems) {  %>
+                        $select.append('<option value="<%=allSystems.PK_SYSTEM_ID%>"><%=allSystems.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [9],
+                "render": function (data, type, row, meta) {
+                    return '<input type="text" class="cciText" value="' + ((data == null) ? '' : data) + '">';
+                }
+            }, {
+                "targets": [10],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="sourceOption">')
+                        //<% options_testSources.forEach(function(source) {  %>
+                        $select.append('<option value="<%=source.PK_TEST_SOURCE_ID%>"><%=source.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [11],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="testMethodOption">')
+                        //<% options_testMethods.forEach(function(testMethod) {  %>
+                        $select.append('<option value="<%=testMethod.PK_TEST_METHOD_ID%>"><%=testMethod.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [12],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="componentOption">')
+                        //<% options_components.forEach(function(component) {  %>
+                        $select.append('<option value="<%=component.PK_COMPONENT_TYPE_DEFAULT_ID%>"><%=component.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [13],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="scopeOption">')
+                        //<% options_testScopes.forEach(function(scope) {  %>
+                        $select.append('<option value="<%=scope.PK_TEST_SCOPE_DEFAULT_ID%>"><%=scope.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            },
+            {
+                "targets": [14],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="catalogOption">')
+                        //<% options_catalogs.forEach(function(catalog) {  %>
+                        $select.append('<option value="<%=catalog.PK_CATALOG_DEFAULT_ID%>"><%=catalog.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [15],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="stageOption">')
+                        //<% options_stages.forEach(function(stage) {  %>
+                        $select.append('<option value="<%=stage.PK_STAGE_DEFAULT_ID%>"><%=stage.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [16],
+                "render": function (data, type, row, meta) {
+                    if (type == "display") {
+                        var $select = $('<select class="categorizationOption">')
+                        //<% options_categorizations.forEach(function(categorization) {  %>
+                        $select.append('<option value="<%=categorization.PK_CATEGORIZATION_ID%>"><%=categorization.NAME%></option>');
+                        //<% }) %>
+                        $select.find('option[value="' + data + '"]').attr('selected', 'selected');
+                        return $select[0].outerHTML
+                    } else {
+                        return data;
+                    }
+                }
+            }, {
+                "targets": [17],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="runTimeCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [18],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="applicableCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [19],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="hybridCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [20],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="inheritableCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [21],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="manualCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [22],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="riskAcceptedCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [23],
+                "render": function (data, type, row, meta) {
+                    return '<input type="checkbox" class="piiOnlyCheckbox" ' + ((data == 1) ? 'checked' : '') + ' >';
+                }
+            }, {
+                "targets": [24],
+                "render": function (data, type, row, meta) {
+                    return '<textarea class="itemDescText" cols="50" rows="3">' + ((data == null) ? '' : data) + '</textarea>';
+
+                }
+            }, {
+                "targets": [25],
+                "render": function (data, type, row, meta) {
+                    return '<textarea class="testObjectiveText" cols="50" rows="3">' + ((data == null) ? '' : data) + '</textarea>';
+
+                }
+            }, {
+                "targets": [26],
+                "render": function (data, type, row, meta) {
+                    return '<textarea class="recommendedCorrectiveActionText" cols="50" rows="3">' + ((data == null) ? '' : data) + '</textarea>';
+
+                }
+            }, {
+                "targets": [27],
+                "render": function (data, type, row, meta) {
+                    return '<textarea class="rationaleText" cols="50" rows="3">' + ((data == null) ? '' : data) + '</textarea>';
+
+                }
+            }
+            ],
+            //scrollY: "500px",
+            scrollX: true,
+            scrollY: 500,
+            fixedColumns: {
+                leftColumns: 3
+            },
+            serverSide: true,
+            processing: true,
+            language: {
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> '
+            }
+
+        });
+
+        $('#teststable').on('change keyup', 'td', function (evt) {
+            if (!$('#updateStatus').hasClass('text-danger'))
+                $('#updateStatus').hide().removeClass().addClass('text-danger').html('Change Detected...').fadeIn("slow");
+        })
+
+        $('#teststable').on('change keyup', 'td', function (evt) {
+
+            var code = evt.which;
+            console.log("hello", code)
+            if (code) {
+                if (!(code == 13 || code == 9)) {
+                    return;
+                }
+            }
+
+            var rowRaw = datatable.row(this.closest('tr')).nodes().to$();
+
+            var testId = datatable.row(this.closest('tr')).id();
+            var procedureTextVal = rowRaw.find('.procedureOption').val();
+            var testNameTextVal = rowRaw.find('.testNameText').val();
+            var controlOptionVal = rowRaw.find('.controlOption').val();
+            var titleTextVal = rowRaw.find('.titleText').val()
+            var frequencyTextVal = rowRaw.find('.frequencyText').val();
+            var autoEvidenceTextVal = rowRaw.find('.autoEvidenceText').val();
+            var gatheredEvidenceTextVal = rowRaw.find('.gatheredEvidenceText').val();
+            var dependsOnTextVal = rowRaw.find('.dependsOnOption').val();
+            var cciTextVal = rowRaw.find('.cciText').val();
+            var sourceOptionVal = rowRaw.find('.sourceOption').val();
+            var methodOptionVal = rowRaw.find('.testMethodOption').val();
+            var componentOptionVal = rowRaw.find('.componentOption').val();
+            var scopeOptionVal = rowRaw.find('.scopeOption').val();
+            var catalogOptionVal = rowRaw.find('.catalogOption').val();
+            var stageOptionVal = rowRaw.find('.stageOption').val();
+            var runTimeCheckboxVal = rowRaw.find('.runTimeCheckbox').is(':checked')
+            var applicableCheckboxVal = rowRaw.find('.applicableCheckbox').is(':checked')
+            var hybridCheckboxVal = rowRaw.find('.hybridCheckbox').is(':checked')
+            var inheritableCheckboxVal = rowRaw.find('.inheritableCheckbox').is(':checked')
+            var riskAcceptedCheckboxVal = rowRaw.find('.riskAcceptedCheckbox').is(':checked')
+            var piiOnlyCheckboxVal = rowRaw.find('.piiOnlyCheckbox').is(':checked')
+            var itemDescTextareaVal = rowRaw.find('.itemDescText').val()
+            var testObjectiveTextareaVal = rowRaw.find('.testObjectiveText').val()
+            var recommendedCorrectiveActionTextareaVal = rowRaw.find('.recommendedCorrectiveActionText').val()
+            var rationaleTextareaVal = rowRaw.find('.rationaleText').val()
+            var manualCheckboxVal = rowRaw.find('.manualCheckbox').is(':checked')
+            var categorizationOptionVal = rowRaw.find('.categorizationOption').val()
+            
+
+            $.ajax({
+                type: 'POST',
+                url: "/testsets/API/updateTest",
+                data: {
+                    "systemID": systemID,
+                    "testID": testId,
+                    "procedure": procedureTextVal,
+                    "testName": testNameTextVal,
+                    "title": titleTextVal,
+                    "control": controlOptionVal,
+                    "frequency": frequencyTextVal,
+                    "autoEvidence": autoEvidenceTextVal,
+                    "gatheredEvidence": gatheredEvidenceTextVal,
+                    "dependsOn": dependsOnTextVal,
+                    "cci": cciTextVal,
+                    "sourceID": sourceOptionVal,
+                    "methodID": methodOptionVal,
+                    "componentID": componentOptionVal,
+                    "scopeID": scopeOptionVal,
+                    "catalogID": catalogOptionVal,
+                    "stageID": stageOptionVal,
+                    "runTime": runTimeCheckboxVal,
+                    "applicable": applicableCheckboxVal,
+                    "hybrid": hybridCheckboxVal,
+                    "inheritable": inheritableCheckboxVal,
+                    "riskAccepted": riskAcceptedCheckboxVal,
+                    "piiOnly": piiOnlyCheckboxVal,
+                    "itemDesc": itemDescTextareaVal,
+                    "testObjective": testObjectiveTextareaVal,
+                    "recommendedCorrectiveAction": recommendedCorrectiveActionTextareaVal,
+                    "rationale": rationaleTextareaVal,
+                    "manual": manualCheckboxVal,
+                    "categorization": categorizationOptionVal,
+                    
+                },
+                success: function (data) {
+                    $('#updateStatus').removeClass().addClass('text-success').html('Record Updated').fadeOut(3000)
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log("Something Went Wrong");
+                }
+            });
+
+        });
+
+        $("#btnAddTest").click(function (event) {
+
+            window.location.replace('../testsetadd/<%=systemId%>');
+
+        });
+
+    </script>
+</body>
+
+</html>

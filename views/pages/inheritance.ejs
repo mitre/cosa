@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Inheritance Report </h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="infodiv" class="box-body table-responsive">
+                                <select id="sysselect">
+                                    <option></option>
+                                    <% systems.forEach(sys => { %>
+                                    <option id=option_<%=sys.PK_SYSTEM_ID%> value="<%=sys.NAME%>"><%=sys.NAME%></option>
+                                    <% }); %>
+                                </select>
+                                <hr />
+                                <table id="results">
+                                    <thead>
+                                        <tr>
+                                            <th>Inherited From</th>
+                                            <th>Control Count</th>
+                                            <th>% of All Inherited Tests</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <!-- /.box -->
+                            </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+<% include ../partials/footer %>
+    </div>
+    </div>
+
+  
+  
+    </div>
+    <!-- ./wrapper -->
+
+    <script type="text/javascript">
+
+        $('#sidebar_inheritance_report').addClass("active");
+        var datatable;
+        var auditId;
+        var rowCount = 0;
+
+        var results_tab = $('#results');
+        $('#results').DataTable();
+        $('#sysselect').on('input', function (ev) {
+            var system = ev.target.value;
+            $.getJSON("./inheritance_by_system", { system }, function (data) {
+                results_tab.DataTable({
+                    destroy: true,
+                    data: data.results,
+                    columns: [
+                        { data: 'INHERITED_FROM' },
+                        { data: 'CONTROL_COUNT' },
+                        { data: 'PERCENTAGE' },
+                    ]
+                });
+            }).fail(function (data, status) {
+                alert('Not authorized...');
+                window.location.replace('/home');
+            });
+        });
+
+        /*
+                $('#results tbody').on('click', 'tr', function () {
+
+                    datatable = $('#audittable').DataTable();
+
+                    var data = datatable.row(this).data();
+                    auditId = data.DT_RowId;
+                    datatable.$('tr.selected').removeClass('selected');
+                    $(this).addClass('selected');
+                    console.log("auditId: " + auditId);
+
+                    $.ajax({
+
+                        url: "./getAuditInfo",
+
+                        data: {
+
+                            "auditId": auditId
+
+                        },
+                        success: function (auditInfo) {
+
+                            console.log("Returned from getAuditInfo");
+
+                            if (auditInfo.message == 'Success') {
+
+                                console.log("System Name: " + auditInfo.workitems[0].SYSTEM_NAME);
+
+                                $('#inputSystemName').val(auditInfo.workitems[0].SYSTEM_NAME);
+                                $('#inputControlName').val(auditInfo.workitems[0].SECURITY_CONTROL_NAME);
+                                $('#inputControlItem').val(auditInfo.workitems[0].SYSTEM_CONTROL_TEST_CONTROL_ITEM);
+                                $('#inputRole').val(auditInfo.workitems[0].SYSTEM_ROLES_DEFAULT_NAME);
+                                $('#inputChangedBy').val(auditInfo.workitems[0].CHANGED_BY);
+                                $('#inputProcedure').val(auditInfo.workitems[0].PROCEDURE_TYPE_NAME);
+                                $('#inputResultDescription').val(auditInfo.workitems[0].RESULT_DESC);
+                                $('#inputStatus').val(auditInfo.workitems[0].WORK_ITEM_STATUS_DEFAULT_NAME);
+                                $('#inputChangedOn').val(auditInfo.workitems[0].CHANGED_ON);
+                                $('#inputExpirationDate').val(auditInfo.workitems[0].EXPIRATION_DATE);
+
+                                $('#auditModal').modal();
+
+                            } else {
+                                alert("Error")
+                            }
+                        }
+                    });
+                });
+        */
+    </script>
+
+</body>
+
+</html>

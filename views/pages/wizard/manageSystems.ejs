@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+
+        <div class="wizard-window">
+            <form id="system-form">
+
+                <div class="form-group">
+                    <label for="inputSystem">Please Select a System</label>
+                    <select class="form-control" id="inputSystem">
+                        <option></option>
+                        <% systems.forEach(system => { %>
+                        <option value="<%= system.PK_SYSTEM_ID %>"><%= system.NAME %></option>
+                        <% }); %>
+
+                    </select>
+                </div>
+
+                <div class="form-nav-buttons">
+                    <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="#wizard-cancellation">Cancel</button>
+                    
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+    <% include ../../partials/footer %>
+
+    <script type="text/javascript" async="true">
+
+        $("#inputSystem").change(function (event) {
+            var selectedSystemID = $('#inputSystem :selected').val();
+            if (selectedSystemID != '') {
+
+                $.post({
+                    url: "./goManageSystem",
+
+                    data: {
+                        "selectedSystemID": selectedSystemID
+                    },
+                    success: function (info) {
+
+                        if (info == 'Success') {
+                            window.location = '/wizard/addSystem';
+                        } else {
+                            console.log('Server: error sending form');
+                            console.log(info);
+                        }
+                    }
+                });
+            }
+        });
+
+    </script>
+</body>
+
+</html>

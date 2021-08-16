@@ -1,0 +1,33 @@
+<div class="modal fade" id="cosaModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" style="width:40%" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <img src="../images/cosa_logo.png" />
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">To generate a Compliance Assessment file</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6">
+                        Please choose a System :
+                        <select class="form-control" tabindex="1" aria-hidden="true" id="cosaSystem">
+                            <option></option>
+                            <% systems.forEach(function(system) {  %>
+                                <option value="<%= system.PK_SYSTEM_ID %>">
+                                    <%= system.NAME %>
+                                </option>
+                                <% }) %>
+                        </select>
+                        <span id='cosaMessage' class='text-red'></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

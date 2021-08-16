@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+  <% include ../partials/head %>
+  <% function plural(n,s) { n = parseInt(n,10); return n + ' ' + ((n != 1)? s + 's' : s); } %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+  <div class="wrapper">
+
+    <header class="main-header">
+      <% include ../partials/header %>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="main-sidebar">
+      <% include ../partials/sidebar %>
+    </aside>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+      <section class="content-header">
+      </section>
+
+      <!-- Main content -->
+      <section class="content">
+
+        <% include ../partials/workItemDescriptionModal %>
+
+        <div class="box">
+          <div class="box-header with-border">
+            <h3 class="box-title">Welcome
+              <%= username %>
+              <br />
+              <br />Current compliance trend for your Systems:</h3>
+            <br />
+            <br />
+
+            <div id="system-row" class="row">
+
+              <%  stats.forEach(function (stat) { %>
+              <div class="col-lg-3" id="stat_banner" onClick="showMe(' <%= stat.substring(0,stat.indexOf(" || ")).trim()%>',
+                '<%= stat.substring(stat.indexOf(" || ")+3, stat.indexOf(" | ")).trim() %>')">
+                <% if(stat.indexOf("Fail") != -1) {%>
+                <div class="box box-danger box-solid">
+                    <% } else { %>
+                    <div class="box box-success box-solid">
+                      <% } %>
+
+                      <div class="box-header with-border">
+
+                        <div class="row">
+
+                          <div class="col-xs-3">
+                            <% if(stat.indexOf("Fail") != -1) {%>
+                            <i class="fa fa-times-circle fa-4x"></i>
+                            <% } else { %>
+                            <i class="fa fa-check-circle fa-4x"></i>
+                            <% } %>
+                          </div>
+
+                          <div class="col-xs-9 text-center" id="theSystemDiv">
+                            <h3 id='<%= stat.substring(0,stat.indexOf(" || ")).trim() %>'>
+                              <%= stat.substring(0,stat.indexOf(" || ")).trim() %>
+                            </h3>
+                          </div>
+
+                        </div>
+
+                        <div class="row text-center">
+                          <h2>
+                            <%= stat.substring(stat.indexOf(" | ") + 2, stat.length).trim() %>
+                          </h2>
+                        </div>
+
+                      </div>
+
+                      <div class="description-block">
+                        <% if(stat.indexOf("Fail") != -1) {%>
+                        <span class="description-text">Contains 1 or more failed test</span>
+                        <% } else { %>
+                        <span class="description-text">All tests have Passed</span>
+                        <% } %>
+                      </div>
+
+                    </div>
+                  </div>
+                  <% }) %>
+                </div>
+              </div>
+            </div>
+
+            <h3 id="systemNameLabel"></h3>
+
+            <div class="container" id="progressBar">
+              <div class="progress">
+                <div id="passBar" class="progress-bar progress-bar-success" role="progressbar" style="width:15%">
+                  Passed
+                </div>
+                <div id="incompleteBar" class="progress-bar progress-bar-warning" role="progressbar" style="width:25%">
+                  Incomplete
+                </div>
+                <% if (config.riskAccepted.show)  { %> <!-- start config Feature Flag lookup -->
+                  <div id="acceptedBar" class="progress-bar progress-bar-default" role="progressbar" style="width:35%">
+                  Risk Accepted
+                </div>
+                <% } %>  <!-- end config Feature Flag lookup -->
+                <div id="failBar" class="progress-bar progress-bar-danger" role="progressbar" style="width:25%">
+                  Failed
+                </div>
+              </div>
+            </div>
+
+
+            <div class="row justify-content-center" id="aSystemsDetails">            
+              
+              <div class="col-lg-2 col-md-6" id="passed_banner" onClick="showMe2('Pass')">
+                <div class="box box-success box-solid">
+                  <div class="box-header with-border">
+                    <div class=" text-center">
+                      <h3 id="passedControls">
+                        <%= plural(passedControls+0, 'Control') %>
+                      </h3>
+                      <h3 id="passedTests">
+                        <%= plural(passedTests+0, 'Test') %>
+                      </h3>
+                      <div class="container-fluid">
+                        <div class="row">
+                        <div class="col-xs-1"><i class="fa fa-check-circle fa-3x"></i></div>
+                        <div class="col-xs-11 text-left"><h2>Passed</h2></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="description-block">
+                    <span class="description-text">Passed counts</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-2 col-md-6" id="incomplete_banner" onClick="showMe2('Incomplete')">
+                <div class="box box-warning box-solid">
+                  <div class="box-header with-border">
+                    <div class="text-center">
+                      <h3 id="incompleteControls">
+                        <%= plural(incompleteControls+0, 'Control') %>
+                      </h3>
+                      <h3 id="incompleteTests">
+                        <%= plural(incompleteTests+0, 'Test') %>
+                      </h3>
+                      <div class="container-fluid">
+                        <div class="row">
+                        <div class="col-xs-1"><i class="fa fa-exclamation-circle fa-2x"></i></div>
+                        <div class="col-xs-11"><h2>Incomplete</h2></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="description-block">
+                    <span class="description-text">Incomplete counts</span>
+                  </div>
+                </div>
+              </div>
+
+              <% if (config.riskAccepted.show)  { %> <!-- start config Feature Flag lookup -->
+              <div class="col-lg-2 col-md-6" id="riskAccepted_banner" onClick="showMe2('Risk Accepted')">
+                <div class="box box-info box-solid">
+                  <div class="box-header with-border">
+                    <div class="text-center">
+                      <h3 id="riskAcceptedControls">
+                        <%= plural(riskAcceptedControlss+0, 'Control') %>
+                      </h3>
+                      <h3 id="riskAcceptedTests">
+                        <%= plural(riskAcceptedTests+0, 'Test') %>
+                      </h3>
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-xs-1"><i class="fa fa-thumbs-up fa-3x"></i></div>
+                          <div class="col-xs-11"><h2>Risk Accepted</h2></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="description-block">
+                    <span class="description-text">Risk Accepted counts</span>
+                  </div>
+                </div>
+              </div>
+              <% } %>  <!-- end config Feature Flag lookup -->
+              <div class="col-lg-2 col-md-6" id="failed_banner" onClick="showMe2('Fail')">
+                <div class="box box-danger box-solid">
+                  <div class="box-header with-border">
+                    <div class="text-center">
+                      <h3 id="failedControls">
+                        <%= plural(failedControls+0, 'Control') %>
+                      </h3>
+                      <h3 id="failedTests">
+                        <%= plural(failedTests+0, 'Test') %>
+                      </h3>
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-xs-1"><i class="fa fa-times-circle fa-3x"></i></div>
+                          <div class="col-xs-11"><h2>Failed</h2></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="description-block">
+                    <span class="description-text">Failed counts</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-2 col-md-6" id="total_banner" onClick="showMe2('all')">
+                <div class="box box-default box-solid">
+                  <div class="box-header with-border">
+                    <div class="text-center">
+                      <h3 id="totalControls">
+                        <%= totalControls %> controls
+                      </h3>
+                      <h3 id="totalTests">
+                        <%= totalTests %> tests
+                      </h3>
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-xs-1"><i class="fa fa-bar-chart fa-3x"></i></div>
+                          <div class="col-xs-11"><h2>Total</h2></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="description-block">
+                    <span class="description-text">Total counts</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-2 col-md-6" id="manAuto_banner" onClick="showMe2('all')">
+                <div class="box box-default box-solid">
+                  <div class="box-header with-border">
+                    <div class="text-center">
+                      <span class="info-box-text">Inherited</span>
+                      <span class="info-box-number" id="inheritedTests"><%= inheritedTests %></span>
+                      <span class="info-box-text">Automated</span>
+                      <span class="info-box-number" id="automatedTests"><%= automatedTests %></span>
+                      <span class="info-box-text">Manual</span>
+                      <span class="info-box-number" id="manualTests"><%= manualTests %></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <% include ../partials/workItemDetailsTable %>
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <% include ../partials/footer %>
+  </div>
+
+  <script type="text/javascript" src="/static/workItemDetailsTable.js"></script>
+
+  <!-- ./wrapper -->
+  <script type="text/javascript">
+  function plural(n, s) { n = parseInt(n, 10); return n + ' ' + ((n != 1) ? s + 's' : s); }
+    $('#sidebar_my_systems').addClass("active");
+
+    $("#aSystemsDetails").hide();
+    $("#systemsOutput").hide();
+    $("#progressBar").hide();
+
+    var selectedSysName;
+    var selectedSysID;
+
+    function showMe(selectedSystemName, selectedSystemID) {
+
+      //alert("Name: " + selectedSystemName + " id: " + selectedSystemID);
+
+      $("#systemsOutput").hide();
+
+      selectedSysName = selectedSystemName
+      selectedSysID = selectedSystemID
+
+      $.ajax({
+        url: "./getCountsForSystem",
+
+        data: {
+          "systemID": selectedSysID
+        },
+        success: function (info) {
+          //alert(JSON.stringify(info));
+          //alert(JSON.stringify(info.message));
+          if (info.message == 'Success') {
+            //alert(JSON.stringify(info));
+            $('#passedTests').html(plural(info.passedTests, 'Test'));
+            $('#incompleteTests').html(plural(info.incompleteTests, 'Test'));
+            $('#acceptedTests').html(plural(info.acceptedTests, 'Test'));
+            $('#failedTests').html(plural(info.failedTests, 'Test'));
+            $('#riskAcceptedTests').html(plural(info.riskAcceptedTests, 'Test'));
+            $('#automatedTests').html(plural(info.automatedTests, 'Test'));
+            $('#manualTests').html(plural(info.manualTests, 'Test'));
+            $('#inheritedTests').html(plural(info.inheritedTests, 'Test'));
+            $('#totalTests').html(plural(info.totalTests, 'Test'));
+            $('#passedControls').html(plural(info.passedControls, 'Control'));
+            $('#failedControls').html(plural(info.failedControls, 'Control'));
+            $('#incompleteControls').html(plural(info.incompleteControls, 'Control'));
+            $('#totalControls').html(plural(info.totalControls, 'Control'));
+
+            $('#systemNameLabel').html(selectedSysName + " -  Test finding's status");
+            $('#passBar').attr('style', 'width:' + info.passPercent + '%');
+            $('#incompleteBar').attr('style', 'width:' + info.incompletePercent + '%');
+            $('#acceptedBar').attr('style', 'width:' + info.acceptedPercent + '%');
+            $('#failBar').attr('style', 'width:' + info.failPercent + '%');
+            $("#progressBar").show();
+          } else {
+            // put error msg here  -JC
+            alert("Error getting system compliance counts");
+          }
+        },
+        error: function (error) {
+
+          if (error.status == '401') {
+            alert('Unauthorized... ');
+            window.location.replace('/home');
+          } else {
+            // handle error
+            console.log('Error getting system compliance counts ' + error);
+          }
+        }
+      });
+      $("#aSystemsDetails").show();
+    }
+
+    function showMe2(showWhat) {
+
+      loadDetails(selectedSysID, showWhat);
+
+    }
+
+  </script>
+
+</body>
+
+</html>

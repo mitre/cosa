@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <h3 style="padding-left: 10px;">All Results by System/Organization</h3>
+                <div class="row">
+                    <div class="col-lg-4 col-md-6" id="selectSystem">
+                        <label for="inputSystem" class="control-label">Select a System or Organization</label>
+                        <select class="form-control  select2 select2-hidden-accesible" style="width: 100%" tabindex="1"
+                            aria-hidden="true" id="inputSystem">
+                            <option></option>
+                            <% systems.forEach(function(system) {  %>
+                            <option value="<%= system.PK_SYSTEM_ID %>">
+                                <%= system.NAME %>
+                            </option>
+                            <% }) %>
+                        </select>
+                    </div>
+                </div> <!-- end row -->
+
+                <div class="row" id="systemsDetails">
+                    <div class="col-lg-12">
+                        <table id="systemsTable" class="table table-condensed">
+                            <tbody>
+                                <tr valign="top">
+                                    <td>
+                                        <h4><b>System Name: </b><span id="sysName"></span></h4>
+                                    </td>
+                                    <td>
+                                        <h4><b>Acronym: </b><span id="sysAcro"></span></h4>
+                                    </td>
+                                    <td>
+                                        <h4><b>Categorization: </b><span id="sysCat"></span></h4>
+                                    </td>
+                                    <td>
+                                        <h4><b>High Value Asset: </b><span id="sysHVA"></span></h4>
+                                    </td>
+                                </tr>
+                                <tr valign="top">
+                                    <td colspan="4">
+                                        <h4><b>System Desc: </b><span id="sysDesc"></span></h4>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- end row -->
+                <hr>
+                <div class="row" id="testDetails">
+                    <div class="col-lg-12" style="overflow-x: scroll">
+                        <table id="resultsTable" class="table table-bordered table-hover" cellspacing="0" width="100%">
+                            <thead>
+                                <tr>
+                                    <th class="text" width="12%">Control Name</th>
+                                    <th class="text" width="20%">Description</th>
+                                    <th class="text" width="12%">Result</th>
+                                    <th class="text">Check Method</th>
+                                    <th class="text">Inherited From</th>
+                                    <th class="text">Expiration Date</th>
+                                    <th class="text" width="10%">Test Frequency</th>
+                                    <th class="text">Evidence Files (click to download)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- end row -->
+
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <% include ../partials/footer %>
+    </div>
+    
+    <script type="text/javascript">
+        $("#systemsTable").hide();
+        $('#resultsTable').hide();
+
+        $("#inputSystem").change(function (event) {
+
+            var selectedSystemID = $('#inputSystem :selected').val();
+
+            if (selectedSystemID != '') {
+                $.ajax({
+                    url: "./getCOSAResults",
+                    data: {
+                        "systemID": selectedSystemID
+                    },
+                    success: function (data) {
+
+                        if (data.message == 'Success') {
+                            $('#sysName').html(data.info[0].NAME);
+                            $('#sysAcro').html(data.info[0].ACRONYM);
+                            $('#sysCat').html(data.info[0].CATEGORIZATION);
+                            $('#sysDesc').html(data.info[0].DESCRIPTION);
+                            $('#sysHVA').html(data.info[0].HIGH_VALUE_ASSET);
+
+                            $("#systemsDetails").show(); // for systems details for the selected table
+                            $('#resultsTableBody').html(''); // used to clear table betwen System name changes
+                            for (let i = 0; i < data.results.length; i++) {
+                                var inherited = "";
+                                if (data.results[i].INHERITED_FROM != null) {
+                                    inherited = data.results[i].INHERITED_FROM;
+                                }
+                                
+                                var expirationDate = "";
+                                if (data.results[i].EXPIRATION_DATE != null) {
+                                    expirationDate = data.results[i].EXPIRATION_DATE;
+                                    expirationDate = moment(expirationDate).format('MMM D, YYYY');
+                                }
+
+                                var status = data.results[i].STATUS;
+                                var cell = '<span class="label label-default">Unknown</span>';
+                                switch (status) {
+                                    case "Pass":
+                                        cell = '<span class="label label-success">Passed</span>'
+                                        break;
+                                    case "Incomplete":
+                                        cell = '<span class="label label-warning">Incomplete</span>'
+                                        break;
+                                    case "Fail":
+                                        cell = '<span class="label label-danger">Failed</span>'
+                                        break;
+                                    case "Risk Accepted":
+                                        cell = '<span class="label label-info">Risk Accepted</span>'
+                                        break;
+                                    default:
+                                        cell = '<span class="label label-default">' + data + '</span>'
+                                        break;
+                                }
+
+                                $('#aStatus').html("<b>Status: </b>" + cell);
+
+                                var evidenceFiles = '';
+                                if(data.results[i].EVIDENCE_FILES != null) {
+                                    var evidenceFilesArray = data.results[i].EVIDENCE_FILES.split(','); 
+                                    for(let j = 0; j < evidenceFilesArray.length; j++){
+                                        evidenceFiles += '<label onclick="downloadFile(\''+evidenceFilesArray[j].trim()+'\',\''+data.results[i].PK_WORK_ITEM_RESULT_ID+'\')">'+evidenceFilesArray[j]+'</label></br>';
+                                    }
+                                }
+                              
+                                var frequency = data.results[i].FREQUENCY;
+                                if((frequency != null) && (frequency != '')){
+                                    // example: 03Y00M00D00H00M
+                                    var year, month, day, hour, min;
+                                    year = parseInt(frequency.substring(0,2), 10); // parseInt() to remove leading '0's
+                                    month = parseInt(frequency.substring(3,5), 10);
+                                    day = parseInt(frequency.substring(6,8), 10);
+                                    hour = parseInt(frequency.substring(9,11), 10);
+                                    min = parseInt(frequency.substring(12,14), 10);
+                                   
+                                    var yearLabel, monthLabel, dayLabel, hourLabel, minLabel;
+                                    if(year == '1') { yearLabel = " Year, "} else {yearLabel = " Years, "}
+                                    if(month == '1') { monthLabel = " Month, "} else {monthLabel = " Months, "}
+                                    if(day == '1') { dayLabel = " Day, "} else {dayLabel = " Days, "}
+                                    if(hour == '1') { hourLabel = " Hour, "} else {hourLabel = " Hours, "}
+                                    if(min == '1') { minLabel = " Minute"} else {minLabel = " Minutes"}
+                                   
+                                    frequency = year+ yearLabel+ month+ monthLabel+ day+ dayLabel+ hour+ hourLabel+ min+ minLabel;
+                                    if(frequency.includes('NaN')) {frequency = '';} // catch all bad formats or incorrect database entries.
+                                }
+
+                                var testRow = `<tr>
+                            <td>`+ data.results[i].CONTROL_NAME + `</td>
+                            <td>`+ data.results[i].DESCRIPTION + `</td>
+                            <td>`+ cell + `</td>
+                            <td>`+ data.results[i].CHECK_METHOD + `</td>
+                            <td>`+ inherited + `</td>
+                            <td>`+ expirationDate + `</td>
+                            <td>`+ frequency+ `</td>
+                            <td>`+ evidenceFiles + `</td>                         
+                            </tr>`;
+                                $('#resultsTableBody').append(testRow);
+                            }
+                            $("#systemsTable").show();
+                            $('#resultsTable').show();
+                        } else {
+                            alert("Error")
+                        }
+                    },
+                    error: function (error) {
+
+                        if (error.status == '401') {
+                            alert('Unauthorized... ');
+                            window.location.replace('/home');
+                        } else {
+                            // handle error
+                            console.log('Error getting System Data ' + error);
+                        }
+                    }
+                });
+            };
+        });
+
+            function downloadFile(evidenceFileName, workitemId){
+                window.location = "getEvidenceFiles?evidenceFile=" + evidenceFileName + "&workitemId=" + workitemId;
+            };
+    </script>
+
+</body>
+
+</html>

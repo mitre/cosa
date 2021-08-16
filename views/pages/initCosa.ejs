@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">WARNING: Using this dialog will significantly modify the database.
+                                    This should only be run by those very knowledgable about COSA.</h3>
+                                <div class="pull-right box-tools">
+                                </div>
+                            </div>
+                            <!-- /.box-header -->
+                            <div class="box box-danger" class="col-xs-6">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">COSA Catalog Importer</h3>
+                                </div>
+                                <div id="db-btn-group" class="box-body">
+                                    <div class="row">
+                                        <div class="col-xs-6" style="padding-left: 10px;">
+                                            <button type="button" class="btn btn-danger"
+                                                id="initialize_cosa_btn">Initialize COSA</button>
+                                        </div>
+                                    </div> <!-- end row 1 -->
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+
+    <div class="modal fade" id="init-cancellation" tabindex="-1" role="dialog" aria-labelledby="init-cancellation"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body centered">
+                    <img src="/images/warning-shield.png" alt="warning shield image">
+                    <h3 class="modal-title" id="wizard-cancellation">Are you sure?</h3>
+                    <p class="info-txt">This will remove existing systems, tests, and results from the DB.</p>
+                </div>
+
+                <div class="modal-footer centered">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        onclick="navigateBack('home')">Cancel</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal" onclick='loadTests()'>Yes,
+                        initialize!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="files-select" tabindex="-1" role="dialog" aria-labelledby="files-select"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body centered">
+                    <div class="modal-content">
+
+                        <input type="file" id="files" name="files[]" class="" multiple />
+
+                        <output id="filelist" />
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id='start_initialize_btn'>Initialize
+                            COSA</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner-prompt" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header centered">
+                    <div class="spinner-circle"></div>
+                </div>
+
+                <div class="modal-body centered">
+                    <p>Initializing COSA...</p>
+                    <p>Please wait a moment</p>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+                            aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        $('#start_initialize_btn').attr('disabled', true);
+
+        $('#files').change(function (evt) { $('#start_initialize_btn').attr('disabled', false); });
+
+        $('#sidebar-collapse').addClass('show');
+
+        $("#initialize_cosa_btn").click(function (event) {
+            event.preventDefault();
+            $('#start_initialize_btn').show();
+
+            $('#files-select').modal();
+
+        });
+
+        $("#start_initialize_btn").click(function (event) {
+
+            event.preventDefault();
+
+            $('#files-select').modal('hide');
+
+            $('#init-cancellation').modal();
+
+        });
+
+        function loadTests() {
+
+            var files = document.getElementById('files').files;
+
+            console.log("Files: " + JSON.stringify(files));
+
+            for (var i = 0, f; f = files[i]; i++) {
+
+                var r = new FileReader();
+
+                r.onload = (function (f) {
+
+                    return function (e) {
+
+                        var formData = new FormData();
+                        var content = e.target.result;
+
+                        console.log("Got the file.\n"
+                            + "name: " + f.name + "\n"
+                            + "type: " + f.type + "\n"
+                            + "size: " + f.size + " bytes\n"
+                            + "starts with: " + content.substr(0, 100) + "\n");
+
+                        $.post("/setup/LoadTests", {
+
+                            "fileName": f.name,
+                            "filePath": f.path,
+                            "fileContent": content
+
+                        }).done(function (data) {
+
+                            console.log('Test load is complete.');
+
+                        }).fail(function (err) {
+
+                            if (err.status == '401') {
+
+                                alert('Unauthorized... ');
+                                window.location.replace('/home');
+
+                            } else {
+
+                                // handle error
+                                console.log('Error uploading test files ' + err);
+
+                            }
+                        });
+                    }
+                })(f);
+
+                r.readAsText(f);
+
+            }
+        };
+
+        function navigateHome() {
+            window.location = '/home';
+        }
+
+    </script>
+
+</body>
+
+</html>

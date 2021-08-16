@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+    <script src="../bower_components/chart.js/dist/Chart.bundle.js"></script>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+
+                <% include ../partials/workItemDescriptionModal %>
+
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Welcome
+                            <%= username %>, it's week #
+                            <label id="thisweek"></label>
+                            <br />
+                            <br />Trending Report for your Systems:</h3>
+                        <br />
+                        <br />
+                        <div class="row">
+                            <%  systems.forEach(function (system) { %>
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <div class="col-lg-12" style="overflow-x: scroll; overflow-y: scroll;"
+                                        onclick="loadDetails('<%= system.PK_SYSTEM_ID %>', 'all')">
+                                        <br />
+                                        <br />
+                                        <h2 class="box-title" id="chartTitle">
+                                            <%= system.NAME %>
+                                        </h2>
+                                        <canvas id="<%= system.NAME %>Chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                        </div>
+                        <!-- end row -->
+                        <% include ../partials/workItemDetailsTable %>
+                    </div>
+                </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content-wrapper -->
+        
+    <% include ../partials/footer %>
+    </div>
+
+    <script type="text/javascript" src="/static/workItemDetailsTable.js"></script>
+
+    <script type="text/javascript">
+        $('#sidebar_my_reports').addClass("active");
+        $('#thisweek').html(moment().format('w'));
+        $("#systemsOutput").hide();
+
+        // AJAX call to fetch trending data for all systems.
+        $.ajax({
+            url: "./getTrendChartData",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                    // Begin logic to show Charts
+                    var system;
+                    var systemArray = new Array();
+                    var status;
+                    var modifiedDate;
+                    var dict = {}; // Dictionary of SYSTEMS counts
+
+                    // Build a graph one per system
+                    for (var i = 0; i < info.data.length; i++) {
+                        system = info.data[i].SYSTEM;
+                        // Determine whether an array contains a value [duplicate]
+                        if ($.inArray(system, systemArray) != -1) {
+                            // alert("do nothing");
+                        } else {
+                            systemArray.push(system); //need these for building charts per system
+                        }
+                        status = info.data[i].STATUS;
+                        week = info.data[i].WEEK - 1; // minus 1 to accomodate graph starting at 1 and not zero
+                        statusCount = info.data[i].STATUS_COUNT;
+
+                        // Check if the system already exists in the Dictionary
+                        if (system in dict) {
+                            if (status == "Pass") {
+                                dict[system][0][week] = statusCount;
+                            }
+                            if (status == "Incomplete") {
+                                dict[system][1][week] = statusCount;
+                            }
+                            if (status == "Risk Accepted") {
+                                dict[system][2][week] = statusCount;
+                            }
+                            if (status == "Fail") {
+                                dict[system][3][week] = statusCount;
+                            }
+                        } else {
+                            // Create a NEW JavaScript Dictionary dict
+                            var systemPassedCounts = [0];
+                            var systemIncompleteCounts = [0];
+                            var systemAcceptedCounts = [0];
+                            var systemFailedCounts = [0];
+                            if (status == "Pass") {
+                                // Add counts to array in the 1-52 week position
+                                systemPassedCounts[week] = statusCount;
+                            }
+                            if (status == "Incomplete") {
+                                // Add counts to array in the 1-52 week position
+                                systemIncompleteCounts[week] = statusCount;
+                            }
+                            if (status == "Risk Accepted") {
+                                // Add counts to array in the 1-52 week position
+                                systemAcceptedCounts[week] = statusCount;
+                            }
+                            if (status == "Fail") {
+                                // Add counts to array in the 1-52 week position
+                                systemFailedCounts[week] = statusCount;
+                            }
+                            // Add each array (1 per status) to the Dictionary
+                            dict[system] = [systemPassedCounts, systemIncompleteCounts, systemAcceptedCounts, systemFailedCounts];
+
+                        } // end Else create a new entry in the Dictionary
+                    }  //  end for loop
+                    //alert(JSON.stringify(dict)); // Let's see what's in the Dictionary before we build charts
+
+                    // Display the charts for this Dictionary
+                    buildChart(dict, systemArray);
+                } else {
+                    // put msg here  -JC
+                    //alert("Error getting system trending data to display charts");
+                    alert(info.message);
+                }
+            },
+            error: function (error) {
+
+                if (error.status == '401') {
+                    alert('Unauthorized... ');
+                    window.location.replace('/home');
+                } else {
+                    // handle error
+                    console.log('Error getting trend data ' + error);
+                }
+            }
+        });
+
+        // Function to construct a stacked bar chart, 1 per System in the passed in dict (Dictionary Object)
+        function buildChart(dict, systemArray) {
+            //console.log(JSON.stringify(dict));
+            var newLabels = new Array(); // default
+            // build the weeks to display as xAXIS labels
+            for (var i = 1; i <= 52; i++) {
+                newLabels.push(i);
+            }
+            // now get system from Array and build a chart
+            for (var i = 0; i < systemArray.length; i++) {
+                var sysName = systemArray[i];
+                //alert(sysName);
+                var lineChart = new Chart(document.getElementById(sysName + "Chart"), {
+                    "type": "bar",
+                    "data": {
+                        "labels": newLabels,
+                        "datasets": [{
+                            "label": "Pass",
+                            "data": dict[sysName][0],
+                            "backgroundColor": "rgb(0, 153, 0)"
+                        },
+                        {
+                            "label": "Incomplete",
+                            "data": dict[sysName][1],
+                            "backgroundColor": "rgb(0, 192, 239)"
+                        }, {
+                            "label": "Risk Accepted",
+                            "data": dict[sysName][2],
+                            "backgroundColor": "rgb(255, 255, 0)"
+                        },
+                        {
+                            "label": "Fail",
+                            "data": dict[sysName][3],
+                            "backgroundColor": "rgb(255, 0, 0)"
+
+                        }]
+                    },
+                    options: {
+                        seriesBarDistance: 2,
+                        fullWidth: true,
+                        showArea: true,
+                        height: '350px',
+                        legend: {
+                            display: true
+                        },
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                stacked: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Weeks'
+                                },
+                                ticks: {
+                                    //this will fix your problem with NaN
+                                    callback: function (label, index, labels) {
+                                        return label ? label : '';
+                                    }
+                                }
+                            }],
+                            yAxes: [{
+                                stacked: true,
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Work Item Status Counts'
+                                },
+                                ticks: {
+                                    stepSize: 20
+                                }
+                            }]
+                        } // end scales
+                    }//end options
+                });// end line chart
+            } // end for loop
+        } // end function
+
+    </script>
+
+</body>
+
+</html>

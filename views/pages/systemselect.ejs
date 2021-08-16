@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="box">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Select System</h3>
+                            </div>
+                            <!-- /.box-header -->
+                            <div id="systemstablediv" class="box-body table-responsive">
+                                <table id="systemstable" class="table table-bordered table-hover" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                        <tr>
+                                            <th class="text">System Name</th>
+                                            <th class="text">Acronym</th>
+                                            <th class="text">Categorization</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% systems.forEach(function(system) {  %>
+                                        <tr id="<%= system.PK_SYSTEM_ID %>">
+                                            <td>
+                                                <%= system.NAME %>
+                                            </td>
+                                            <td>
+                                                <%= system.ACRONYM %>
+                                            </td>
+                                            <td>
+                                                <%= system.CATEGORIZATION %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                    </div>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+        <% include ../partials/footer %>
+    </div>
+    <!-- ./wrapper -->
+
+    <script type="text/javascript">
+
+        $('#sidebar-collapse').addClass('show');
+        $('#system_select').addClass('active');
+
+        var datatable, systemId;
+
+        datatable = $('#systemstable').DataTable();
+
+        $('#systemstable tbody').on('click', 'tr', function () {
+
+            var data = datatable.row(this).data();
+            systemId = data.DT_RowId;
+
+            console.log("Test set select window opening...id: " + systemId + " name: " + data[0]);
+
+            datatable.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+
+            window.location.replace('manageAllSystemTests/' + systemId);
+
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+<!-- Logo -->
+<a href="/" class="logo">
+    <!-- mini logo for sidebar mini 50x50 pixels -->
+    <span class="logo-mini"><b>e</b></span>
+    <!-- logo for regular state and mobile devices -->
+    <span class="logo-lg"><b>MITRE</b> COSA</span>
+</a>
+
+<!-- Header Navbar: style can be found in header.less -->
+<nav class="navbar navbar-static-top">
+    <!-- Sidebar toggle button-->
+    <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+        <i class="fa fa-bars"></i>
+    </a>
+    <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+            <li>
+                <% if (validSession) { %>
+
+                <a id="usr-popover" href="#" data-container="body" data-toggle="popover" data-placement="bottom"
+                    data-content="<a href='/user/profile'>Profile</a><br><a href='/auth/logout'>Logout</a>">
+                    <img id="usr-profile-img" src="/images/user.png">
+                    <span><%= username %></span>
+                </a>
+
+                <% } else { %>
+                <a href="#" id="LoginLink">Login</a>
+                <script>
+                    $(document).ready(function () {
+                        loginModal();
+                        $('#LoginLink').click(function () {
+                            loginModal()
+                        });
+                        function loginModal() {
+                            $("#form-login").trigger("reset");
+                            $('#loginModal').modal();
+                        }
+                        $('#loginModal').on('shown.bs.modal', function () {
+                            $('#username').focus();
+                        });
+                    });
+                </script>
+
+                <% } %>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+
+    $('#usr-popover').popover({
+        html: true,
+        trigger: 'focus'
+    })
+
+</script>

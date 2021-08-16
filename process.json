@@ -1,0 +1,8 @@
+
+{
+	"apps": [
+	{
+		"name":"MITRE COSA: 9999",
+		"script": "bin/www"
+	}]
+}

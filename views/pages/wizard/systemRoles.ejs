@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+        <% include ../../partials/wizardProgressSteps %>
+        <div class="wizard-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h3>COSA Roles for <%= systemAcronym %></h3>
+            <p>Add users to COSA Roles for <b><%= systemAcronym %></b>. This information can be reviewed and updated later.</p>
+          </div>
+
+        <div class="wizard-window">
+            <form id="sys-roles-form">
+                <!--<h3>System Roles</h3>-->
+
+                <div class="form-group">
+                    <label title="<%=epDesc[0].DESCRIPTION%>" for="sys-provider-select" class="required">System Evidence Provider</label>
+                    <div><span id="provMsgBox" style="display: block; float:left;"></span></div>
+                    <select class="form-control select2 select2-hidden-accesible" multiple="multiple"
+                        style="width: 100%" tabindex="1" aria-hidden="true" id="inputEvidenceProviders" required>
+                        <% users.forEach(function(user) {  %>
+                        <option value="<%= user.PK_USER_ID %>">
+                            <%= user.USER_NAME %>
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label title="<%=eaDesc[0].DESCRIPTION%>" for="sys-approver-select" class="required">System Evidence Approver</label>
+                    <div><span id="appMsgBox" style="display: block; float:left;"></span></div>
+                    <select class="form-control select2 select2-hidden-accesible" multiple="multiple"
+                        style="width: 100%" tabindex="1" aria-hidden="true" id="inputEvidenceApprovers" required>
+                        <% users.forEach(function(user) {  %>
+                        <option value="<%= user.PK_USER_ID %>">
+                            <%= user.USER_NAME %>
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label title="<%=userDesc[0].DESCRIPTION%>" for="sys-user-select" class="required">System User</label>
+                    <div><span id="usrMsgBox" style="display: block; float:left;"></span></div>
+                    <select class="form-control select2 select2-hidden-accesible" multiple="multiple"
+                        style="width: 100%" tabindex="1" aria-hidden="true" id="inputUsers" required>
+                        <% users.forEach(function(user) {  %>
+                        <option value="<%= user.PK_USER_ID %>">
+                            <%= user.USER_NAME %>
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label title="<%=adminDesc[0].DESCRIPTION%>" for="sys-admin-select" class="required">System Admin</label>
+                    <div><span id="admMsgBox" style="display: block; float:left;"></span></div>
+                    <select class="form-control select2 select2-hidden-accesible" multiple="multiple"
+                        style="width: 100%" tabindex="1" aria-hidden="true" id="inputAdmins" required>
+                        <% users.forEach(function(user) {  %>
+                        <option value="<%= user.PK_USER_ID %>">
+                            <%= user.USER_NAME %>
+                        </option>
+                        <% }) %>
+                    </select>
+                </div>
+
+
+                <div class="form-nav-buttons">
+                    <button type="button" class="btn btn-primary" id='btnGoBack'>Back</button>
+                    <button type="button" class="btn btn-primary" id='btnSaveSystem'>Next</button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+
+  
+        <% include ../../partials/footer %>
+
+
+    <script type="text/javascript" async="true">
+
+        var form = $('#sys-roles-form');
+
+        $(document).ready(function () {
+
+            $("#wizardProgressBar  > li:lt(5)").addClass("active");
+
+            $('.sys-role-select2').select2();
+
+            // check that roles are selected. otherwise make them all 'admin'
+            var admins = $('#inputAdmins').val();
+            var providers = $('#inputEvidenceProviders').val();
+            var approvers = $('#inputEvidenceApprovers').val();
+            var users = $('#inputUsers').val();  
+            setDefaultRoles(admins, providers, users, approvers); // sets default vales for System Roles        
+        });
+
+        // AJAX call to fetch system role data for all systems.
+        $.ajax({
+            url: "/wizard/getSystemRoleInfo",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                    $("#sys-roles-form").trigger("reset");
+
+                    var admins = [];
+                    var evidenceProviders = [];
+                    var evidenceApprovers = [];
+                    var users = [];
+
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].ROLE_NAME.indexOf('Admin') != '-1') {
+                            admins.push(info.data[i].FK_USER_ID);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('Evidence Provider') != '-1') {
+                            evidenceProviders.push(info.data[i].FK_USER_ID);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('Evidence Approver') != '-1') {
+                            evidenceApprovers.push(info.data[i].FK_USER_ID);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('User') != '-1') {
+                            users.push(info.data[i].FK_USER_ID);
+                        }
+                    } //end for loop
+
+                    $('#inputAdmins').val(admins).trigger('change')
+                    $('#inputEvidenceProviders').val(evidenceProviders).trigger('change')
+                    $('#inputEvidenceApprovers').val(evidenceApprovers).trigger('change')
+                    $('#inputUsers').val(users).trigger('change')
+
+                    setDefaultRoles(admins, evidenceProviders, users, evidenceApprovers); // sets default vales for System Roles
+
+                } else {
+                    alert("Error")
+                }
+            },
+            error: function (error) {
+
+                if (error.status == '401') {
+                    alert('Unauthorized... ');
+                    window.location.replace('/home');
+                } else {
+                    // handle error
+                    console.log('Error getting system role information ' + error);
+                }
+            }
+        });
+
+
+        $("#btnSaveSystem").click(function (event) {
+            event.preventDefault();
+            // check that roles are selected
+            var admins = $('#inputAdmins').val();
+            var providers = $('#inputEvidenceProviders').val();
+            var approvers = $('#inputEvidenceApprovers').val();
+            var users = $('#inputUsers').val();
+
+            if (((admins.length == 0) || (providers.length == 0) || (users.length == 0)) || (approvers.length == 0)) {
+                alert("Please select at least (1) System Admin, (1) System User, (1) System Evidence Provider, and (1) System Evidence Approver to continue.");
+                return false;
+            } else { //save the systemRoles and advance to the next screen
+                $.post("/wizard/systemRoles", {
+                    "evidenceProviders": $('#inputEvidenceProviders').val(),
+                    "evidenceApprovers": $('#inputEvidenceApprovers').val(),
+                    "users": $('#inputUsers').val(),
+                    "admins": $('#inputAdmins').val()
+                },
+                    function (data, status) {
+                        console.log(data) // data record saved
+                        console.log(status) // success
+                        window.location = '/wizard/systemReview';
+                    }).fail(function (err) {
+                        if (err.status == '401') {
+                            alert('Error Assigning System Roles');
+                            location.reload();
+                        } else {
+                            alert("Error: " + JSON.stringify(err.responseText))
+                        }
+                    });
+            }// end else
+        });
+        
+        function setDefaultRoles(admins, providers, users, approvers){
+            if (((admins.length == 0) || (providers.length == 0) || (users.length == 0)) || (approvers.length == 0)) {
+                $("#inputAdmins").val(["1", "<%=user[0].PK_USER_ID%>"]).change();
+                $("#inputEvidenceProviders").val(["1", "<%=user[0].PK_USER_ID%>"]).change();
+                $("#inputEvidenceApprovers").val(["1", "<%=user[0].PK_USER_ID%>"]).change();
+                $("#inputUsers").val(["1", "<%=user[0].PK_USER_ID%>"]).change();
+            }
+        }
+
+        $("#btnGoBack").click(function (event) {
+            window.location = '/wizard/componentsBasic';
+        });
+
+
+        $('.select2').select2(); // must have for Multi-select to work. -Jc
+        
+        function showMsg(elementName, msg){
+            $("#"+elementName).text(msg);
+            $("#"+elementName).show(); 
+        } 
+        function hideMsg(elementName){
+            $("#"+elementName).hide(); 
+        }
+        
+        $(document).ready(function () {
+        $(".required").after("<span class='red'>*</span>");;
+        });
+    </script>

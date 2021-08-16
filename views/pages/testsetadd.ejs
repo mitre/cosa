@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../partials/head %>
+</head>
+
+<body class="skin-blue fixed sidebar-mini sidebar-mini-expand-feature">
+    <div class="wrapper">
+
+        <header class="main-header">
+            <% include ../partials/header %>
+        </header>
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="main-sidebar">
+            <% include ../partials/sidebar %>
+        </aside>
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+
+            <!-- Main content -->
+            <section class="content">
+                <form class="form-horizontal test-form toggle-disabled has-validation-callback disabled-without-errors"
+                    id="addTestForm">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="box">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">New Test</h3>
+                                </div>
+                                <div>
+                                    <div class="form-group">
+                                        <label for="inputControlName" class="col-sm-2 control-label">Control</label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 70%" tabindex="1"
+                                                aria-hidden="true" id="inputControlName">
+                                                <% controls.forEach(function(control) {  %>
+                                                <option value="<%= control.PK_SECURITY_CONTROL_ID %>">
+                                                    <%= control.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestControlItem" class="col-sm-2 control-label"> Control Item:
+                                        </label>
+                                        <div class="form-inline">
+                                            <label id="inputTestControlItemPrefix" class="col-sm-1 control-label">AC-01</label>
+                                            <input type="text" class="form-control" id="inputTestControlItem"
+                                                name="inputTestControlItem" placeholder="Control item" required
+                                                maxlength="40" data-validation="length"
+                                                data-validation-length="0-40">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestTitle" class="col-sm-2 control-label">Test Title:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestTitle"
+                                                name="inputTestTitle" placeholder="Test title" required minlength="4"
+                                                maxlength="80" data-validation="length" data-validation-length="4-80">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputCatalog" class="col-sm-2 control-label">Catalog: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputCatalog" name="inputCatalog">
+                                                <% catalogs.forEach(function(catalog) { %>
+                                                <% if (catalog.NAME != 'default') { %>
+                                                <option value="<%=catalog.PK_CATALOG_DEFAULT_ID %>"><%= catalog.NAME %>
+                                                </option>
+                                                <% } %>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestDescription" class="col-sm-2 control-label">Description:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="5" cols="125" id="inputTestDescription"
+                                                name="inputTestDescription"
+                                                placeholder="Description of test"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <label for="inputTestRuntime"
+                                                            class="col-sm-2 control-label">Runtime Check:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputTestRuntime"
+                                                                    name="inputTestRuntime">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label for="inputTestApplicable"
+                                                            class="col-sm-2 control-label">Applicable:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputTestApplicable"
+                                                                    name="inputTestApplicable">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label class="col-sm-2 control-label">Hybrid:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputTestHybrid">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label for="inputInheritable"
+                                                            class="col-sm-2 control-label">Inheritable:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputInheritable"
+                                                                    name="inputInheritable">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label for="inputTestManual"
+                                                            class="col-sm-2 control-label">Manual:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputTestManual"
+                                                                    name="inputTestManual">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label for="inputRiskAccepted"
+                                                            class="col-sm-2 control-label">Risk Accept:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputRiskAccepted"
+                                                                    name="inputRiskAccepted">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <label for="inputPII" class="col-sm-2 control-label">PII Only:
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <div class="col-sm-3">
+                                                                <input type="checkbox" id="inputPII" name="inputPII">
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestMethods" class="col-sm-4 control-label">Automation
+                                            Procedure:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 70%" tabindex="1"
+                                                aria-hidden="true" id="inputTestMethods" name="inputTestMethods">
+                                                <% methods.forEach(function(method) {  %>
+                                                <option value="<%= method.PK_SYSTEM_CONTROL_TEST_PROCEDURE_TYPE_ID %>">
+                                                    <%= method.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestFrequencies" class="col-sm-2 control-label">Frequency:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestFrequencies"
+                                                name="inputTestFrequencies" placeholder="Example: 03Y00M00D00H00M"
+                                                minlength="0" maxlength="15" data-validation="length"
+                                                data-validation-length="0-15">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestAutoEvidence" class="col-sm-4 control-label">Automatic
+                                            Evidence:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestAutoEvidence"
+                                                name="inputTestAutoEvidence" placeholder="Test automatic evidence"
+                                                minlength="0" maxlength="45" data-validation="length"
+                                                data-validation-length="0-45">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestGatheredEvidence" class="col-sm-4 control-label">Gathered
+                                            Evidence:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestGatheredEvidence"
+                                                name="inputTestGatheredEvidence" placeholder="Test gathered evidence"
+                                                minlength="0" maxlength="45" data-validation="length"
+                                                data-validation-length="0-45">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestRoles" class="col-sm-2 control-label">Role: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestRoles" name="inputTestRoles">
+                                                <% roles.forEach(function(role) {  %>
+                                                <option value="<%= role.PK_ROLE_ID %>">
+                                                    <%= role.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestCCI" class="col-sm-2 control-label">CCI: </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestCCI"
+                                                name="inputTestCCI" placeholder="Test CCI" minlength="0" maxlength="45"
+                                                data-validation="length" data-validation-length="0-45">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestSourceEnv" class="col-sm-2 control-label">Source
+                                            Environment:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="inputTestSourceEnv"
+                                                name="inputTestSourceEnv" placeholder="Test source environment"
+                                                minlength="0" maxlength="45" data-validation="length"
+                                                data-validation-length="0-45">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestSourceType" class="col-sm-4 control-label">Source Type:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestSourceType" name="inputTestSourceType"
+                                                <% sources.forEach(function(source) { %> <option
+                                                value="<%=source.PK_TEST_SOURCE_ID %>">
+                                                <%= source.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestDepends" class="col-sm-2 control-label">Inherited from:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestDepends" name="inputTestDepends">
+                                                <option value="0">NONE</option>
+                                                <% systems.forEach(function(system) {  %>
+                                                <option value="<%= system.PK_SYSTEM_ID %>">
+                                                    <%= system.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestComponent" class="col-sm-2 control-label">ComponentType:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestComponent" name="inputTestComponent">
+                                                <% components.forEach(function(component) {  %>
+                                                <% if (component.NAME.indexOf("GENERIC") === -1) { %>
+                                                <option value="<%= component.PK_COMPONENT_ID %>"><%= component.NAME %>
+                                                </option>
+                                                <% } %>
+
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestMethod" class="col-sm-2 control-label">Test Method:
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestMethod" name="inputTestMethod">
+                                                <% testMethods.forEach(function(testMethod) {  %>
+                                                <option value="<%= testMethod.PK_TEST_METHOD_ID %>">
+                                                    <%= testMethod.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestObjectives" class="col-sm-2 control-label">Test
+                                            Objective(s):
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="5" cols="125" id="inputTestObjectives"
+                                                name="inputTestObjectives" placeholder="Test objective(s) for test">
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestActions" class="col-sm-4 control-label">Recommended
+                                            Corrective Action(s): </label>
+                                        <div class="col-sm-9">
+                                            <textarea rows="5" cols="125" id="inputTestActions" name="inputTestActions"
+                                                placeholder="Recommended corrective action(s) for test">
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputStage" class="col-sm-2 control-label">Stage: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputStage" name="inputStage">
+                                                <% stages.forEach(function(stage) { %>
+                                                <% if (stage.NAME != 'default') { %>
+                                                <option value="<%=stage.PK_TEST_STAGE_DEFAULT_ID %>"><%= stage.NAME %>
+                                                </option>
+                                                <% } %>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputScope" class="col-sm-2 control-label">Scope: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputScope" name="inputScope">
+                                                <% scopes.forEach(function(scope) { %>
+                                                <option value="<%=scope.PK_TEST_SCOPE_DEFAULT_ID %>"><%= scope.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputTestCategorization" class="col-sm-4 control-label">Test
+                                            Categorization: </label>
+                                        <div class="col-sm-9">
+                                            <select class="form-control" style="width: 50%" tabindex="1"
+                                                aria-hidden="true" id="inputTestCategorization"
+                                                name="inputTestCategorization">
+                                                <% categorizations.forEach(function(categorization) { %> <option
+                                                    value="<%=categorization.PK_CATEGORIZATION_ID %>">
+                                                    <%= categorization.NAME %>
+                                                </option>
+                                                <% }) %>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box -->
+                        <div class="box-footer with-border">
+                            <button type="submit" class="btn btn-primary" id='addTest'>Save Test</button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+            <!-- /.content -->
+        </div>
+        <!-- /.content - wrapper -->
+        <% include ../partials/footer %>
+    </div>
+
+    <!-- ./wrapper -->
+    <script type="text/javascript" src="/static/testTableHelpers.js"></script>
+
+    <script type="text/javascript">
+
+        $('#inputTestControlItemPrefix').text($('#addTestForm').find('input[name=inputControlName]').val());
+
+        $('#admin_treeview').addClass('active');
+        $('#admin_treeview_controls').addClass('active');
+
+        $("#addTestForm").submit(function () {
+
+            event.preventDefault();
+
+            var tests = Array();
+
+            var testcontrolitem = $('#inputTestControlItemPrefix').text() + $(this).find('input[name=inputTestControlItem]').val();
+            var testTitle = $(this).find('input[name=inputTestTitle]').val();
+            var testdescription = $(this).find('textarea[name=inputTestDescription]').val();
+            var testapplicable = $('#inputTestApplicable').is(':checked');
+            var testmethod = $(this).find('select[name=inputTestMethods]').val();
+            var testfrequency = $(this).find('input[name=inputTestFrequencies]').val();
+            var testautoevidence = $(this).find('input[name=inputTestAutoEvidence]').val();
+            var testgatheredevidence = $(this).find('input[name=inputTestGatheredEvidence]').val();
+            var testrole = $(this).find('select[name=inputTestRoles]').val();
+            var testruntime = $('#inputTestRuntime').is(':checked');
+            var testdepends = $(this).find('select[name=inputTestDepends]').val();
+            var testCCI = $(this).find('input[name=inputTestCCI]').val();
+            var testHybrid = $('#inputTestHybrid').is(':checked');//good example
+            var testSourceEnv = $(this).find('input[name=inputTestSourceEnv]').val();
+            var testSourceType = $(this).find('select[name=inputTestSourceType]').val();
+            var testMethod = $(this).find('select[name=inputTestMethod]').val();
+            var testObjectives = $(this).find('textarea[name=inputTestTestObjectives]').val();
+            var testActions = $(this).find('textarea[name=inputTestActions]').val();
+            var testComponent = $(this).find('select[name=inputTestComponent]').val();
+
+            var testIsManual = $('#inputTestManual').is(':checked');
+            var testScope = $(this).find('select[name=inputScope]').val();
+            var testInheritable = $('#inputInheritable').is(':checked');
+            var testRiskAccepted = $('#inputRiskAccepted').is(':checked');
+            var testCatalog = $(this).find('select[name=inputCatalog]').val();
+            var testBaseline = -1; // This is a user created test (not a baseline test).
+            var testStage = $(this).find('select[name=inputStage]').val();
+            var testPII = $('#inputPII').is(':checked');
+            var testRationale = $(this).find('select[name=inputRationale]').val();
+            var testCategorization = $(this).find('select[name=inputTestCategorization]').val();
+
+
+            tests.push([testcontrolitem, testTitle, testdescription, testapplicable, testmethod, testfrequency, testautoevidence,
+                testgatheredevidence, testrole, testruntime, testdepends, testCCI, testHybrid,
+                testSourceEnv, testSourceType, testMethod, testObjectives, testActions,
+                testComponent, testIsManual, testScope, testInheritable, testRiskAccepted, testCatalog,
+                testBaseline, testStage, testPII, testRationale, testCategorization]);
+
+            $.post("./<%= system[0].PK_SYSTEM_ID %>/addTests", {
+
+                "systemId": "<%= system[0].PK_SYSTEM_ID %>",
+                "controlId": $('#inputControlName').val(),
+                "tests": JSON.stringify(tests)
+
+            },
+                function (data, status) {
+
+                    console.log("Saved!!!!");
+                    alert("Saved control test!");
+                    window.location.replace('../manageAllSystemTests/<%= system[0].PK_SYSTEM_ID %>');
+
+                }).fail(function (err) {
+                    if (err.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        alert("Error: " + JSON.stringify(err.responseText))
+                    }
+                });
+        });
+
+        $("#inputControlName").change(function (event) {
+
+
+            var selectedControlID = $('#inputControlName :selected').val();
+            var selectedControlName = $('#inputControlName :selected').text();
+
+            if (selectedControlID != '') {
+
+                $('#inputTestControlItemPrefix').text(selectedControlName);
+
+            }
+        });
+
+    </script>
+</body>
+
+</html>

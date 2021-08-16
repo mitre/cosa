@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+
+    <div id="system-review" class="wizard-container">
+        <% include ../../partials/wizardProgressSteps %>
+        <div class="wizard-header px-3 py-3 mx-auto text-center">
+            <h3>Add New System Review</h3>
+            <p>Below is a summary of the configuration chosen for <b><%= systemAcronym %></b>.
+                This information can be updated by selecting the applicable links in the left menu.</p>
+          </div>
+        <!--<h3>Add New System Review</h3>-->
+
+        <div class="wizard-review-window container">
+            <div class="row">
+
+                <div class="col-md">
+
+                    <h5>System</h5>
+                    <ul class="review-block">
+                        <li><b>Name: </b><span><%= system.NAME %></span></li>
+                        <li><b>Acronym: </b><span><%= system.ACRONYM %></span></li>
+                        <li><b>Categorization: </b><span><%= system.CATEGORIZATION %></span></li>
+                        <li><b>Description: </b><span><%= system.DESCRIPTION %></span></li>
+                        <% if (system.HIGH_VALUE_ASSET == 0) { %>
+                        <li><b>High Value Asset: </b><span>False</span></li>
+                        <% } else { %>
+                        <li><b>High Value Asset: </b><span>True</span></li>
+                        <% } %>
+                    </ul>
+
+                    <h5>System Roles</h5>
+                    <ul class="review-block">
+                        <li><b>Admins: </b><span id="admins"></span></li>
+                        <li><b>Evidence Providers: </b><span id="providers"></span></li>
+                        <li><b>Evidence Approvers: </b><span id="approvers"></span></li>
+                        <li><b>Users: </b><span id="users"></span></li>
+                    </ul>
+
+                    <h5>System Component Types</h5>
+                    <ul class="review-block component-list"></ul>
+
+                </div>
+
+                <div class="col-md">
+
+                    <h5>Catalog / Profiles</h5>
+                    <ul class="review-block catalogs-list"></ul>
+
+                    <h5>Inheritance</h5>
+                    <ul class="review-block inheritance-list"></ul>
+
+                    <h5>Untested Security Controls</h5>
+                    <label id="untested"></label> out of <label id="total"></label>
+                    <ul class="review-block untested-controls-list"></ul>
+               
+                </div>
+
+            </div>
+
+            <div class="form-nav-buttons">
+                <button type="button" class="btn btn-primary" id="buttonBack">Back</button>
+                <button type="button" class="btn btn-primary" id="buttonAdvSteps">Customize</button>
+                <button type="button" title="Complete System Update" class="btn btn-primary"
+                    id="buttonUpdateSystemResults">Update</button>
+                <button type="button" title="Finish System Creation" class="btn btn-primary"
+                    id="buttonDeploySystem">Finish</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinner-prompt" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header centered">
+                    <div class="spinner-circle"></div>
+                </div>
+
+                <div class="modal-body centered">
+                    <p>Deploying System. Please wait a moment.</p>
+                    <div class="progress">
+                        <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+                            aria-valuemax="100"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+        <% include ../../partials/footer %>
+
+
+    <script type="text/javascript" async="true">
+
+$("#wizardProgressBar  > li:lt(6)").addClass("active");
+        // AJAX call to fetch systemRoles data.
+        $.ajax({
+            url: "/wizard/getSystemRolesForReviewPage",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+
+                    // placeholders for roles    
+                    var admins = [];
+                    var evidenceProviders = [];
+                    var evidenceApprovers = [];
+                    var users = [];
+
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].ROLE_NAME.indexOf('Admin') != '-1') {
+                            admins.push(info.data[i].USER_NAME);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('Evidence Provider') != '-1') {
+                            evidenceProviders.push(info.data[i].USER_NAME);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('Evidence Approver') != '-1') {
+                            evidenceApprovers.push(info.data[i].USER_NAME);
+                        }
+                        if (info.data[i].ROLE_NAME.indexOf('User') != '-1') {
+                            users.push(info.data[i].USER_NAME);
+                        }
+                    } //end for loop
+
+                    // displays to the screen
+                    $('#admins').text(admins)
+                    $('#providers').text(evidenceProviders)
+                    $('#approvers').text(evidenceApprovers)
+                    $('#users').text(users)
+                } else {
+                    alert("Error")
+                }
+            }
+        });
+
+        // AJAX call to fetch catalog data.
+        $.ajax({
+            url: "/wizard/getCatalogsForReviewPage",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                   // info.data.sort((a, b) => (a.NAME > b.NAME) ? 1 : ((b.NAME > a.NAME) ? -1 : 0));
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].NAME) {
+                            $('.catalogs-list').append(`<li>${info.data[i].NAME}</li>`)
+                        }
+                    }
+                } else {
+                    alert("Error")
+                }
+            }
+        });
+
+        // AJAX call to fetch inheritance data.
+        $.ajax({
+            url: "/wizard/getInheritanceForReviewPage",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                   // info.data.sort((a, b) => (a.NAME > b.NAME) ? 1 : ((b.NAME > a.NAME) ? -1 : 0));
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].NAME) {
+                            $('.inheritance-list').append(`<li>${info.data[i].NAME}</li>`)
+                        }
+                    }
+                } else {
+                    alert("Error")
+                }
+            }
+        });
+
+        // AJAX call to fetch untested security controls.
+        $.ajax({
+            url: "/wizard/getUntestedSecurityControlsForReviewPage",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                    //info.data.sort((a, b) => (a.NAME > b.NAME) ? 1 : ((b.NAME > a.NAME) ? -1 : 0));
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].NAME) {
+                            $('.untested-controls-list').append(`<li>${info.data[i].NAME}</li>`)
+                        }
+                    }
+                    $('#total').text(info.total[0].TOTAL);
+                    $('#untested').text(info.untested[0].UNTESTED);
+                } else {
+                    alert("Error")
+                }
+            }
+        });
+
+
+        // AJAX call to fetch components data.
+        $.ajax({
+            url: "/wizard/getComponentsForReviewPage",
+
+            data: {
+            },
+            success: function (info) {
+                if (info.message == 'Success') {
+                   // info.data.sort((a, b) => (a.NAME > b.NAME) ? 1 : ((b.NAME > a.NAME) ? -1 : 0));
+                    for (var i = 0; i < info.data.length; i++) {
+                        if (info.data[i].COMPONENT_TYPE) {
+                            $('.component-list').append(`<li>${info.data[i].COMPONENT_TYPE}</li>`)
+                        }
+                    }
+                } else {
+                    alert("Error")
+                }
+            }
+        });
+
+        
+        let isActive = "<%= system.ACTIVE %>";
+
+        if (isActive == 1) {
+
+            $('#buttonDeploySystem').hide();
+            $('#buttonUpdateSystemResults').show();
+
+        } else {
+
+            $('#buttonUpdateSystemResults').hide();
+            $('#buttonDeploySystem').show();
+        }
+
+        $("#buttonBack").click(function (event) {
+            window.location = '/wizard/systemRoles';
+        });
+
+        $("#buttonAdvSteps").click(function (event) {
+            window.location = '/wizard/componentConfig';
+        });
+
+        $("#buttonUpdateSystemResults").click(function (event) {
+
+            var progress = 0;
+            var timer;
+
+            // display loading spinner modal
+            $('#spinner-prompt').modal({
+                show: true,
+                focus: true,
+                backdrop: 'static'          // prevent dismiss on outside click
+            });
+
+            // slowly fill progress bar
+            timer = window.setInterval(function () {
+                if (progress < 91) {
+                    // increase progress bar randomly by 2% - 9%
+                    progress += Math.floor(Math.random() * (9 - 2 + 1) + 2);
+                    $('.progress-bar').css('width', `${progress}%`);
+                }
+            }, 1000);
+
+            $.post('/wizard/updateSystemResults', {// no args
+            },
+                function (data, status) {
+
+                    clearInterval(timer);
+
+                    if (data == "Success") {
+
+                        $('.progress-bar').css('width', '100%');
+
+                        // change modal content to success
+                        $(' #spinner-prompt .modal-content').html(`
+                                <div class="modal-header centered flex-col">
+                                    <h3>System Results Successfully Updated</h3>
+                                    <figure class="success-image">
+                                        <img src="/images/checkmark.png">
+                                    </figure>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="navigateHome()">Home</button>
+                                </div>
+                            `);
+
+                    } else {
+
+                        console.log('Server: error updating system results');
+
+                    }
+                }).fail(function (err) {
+
+                    $('#spinner-prompt .modal-content').html(`
+                        <div class="modal-header centered">
+                            <figure>
+                                <img src="/images/error.png">
+                            </figure>
+                        </div>
+
+                        <div class="modal-body centered">
+                            <p>There was a problem updating system results</p>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="navigateHome()">Continue</button>
+                        </div>
+                    `);
+
+                    if (err.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        console.log('Server: error updating the system results');
+                    }
+                });
+
+        });
+
+        $("#buttonDeploySystem").click(function (event) {
+
+            var progress = 0;
+            var timer;
+
+            // display loading spinner modal
+            $('#spinner-prompt').modal({
+                show: true,
+                focus: true,
+                backdrop: 'static'          // prevent dismiss on outside click
+            });
+
+            // slowly fill progress bar
+            timer = window.setInterval(function () {
+                if (progress < 91) {
+                    // increase progress bar randomly by 2% - 9%
+                    progress += Math.floor(Math.random() * (9 - 2 + 1) + 2);
+                    $('.progress-bar').css('width', `${progress}%`);
+                }
+            }, 1000);
+
+            $.post('/wizard/deploySystem', {// no args
+            },
+                function (data, status) {
+                    clearInterval(timer);
+
+                    if (data == "Success") {
+
+                        $('.progress-bar').css('width', '100%');
+
+                        // change modal content to success
+                        $(' #spinner-prompt .modal-content').html(`
+                                <div class="modal-header centered flex-col">
+                                    <h3>System Successfully Deployed</h3>
+                                    <figure class="success-image">
+                                        <img src="/images/checkmark.png">
+                                    </figure>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="navigateHome()">Home</button>
+                                </div>
+                            `);
+
+                    } else if (data == "Already Deployed") {
+
+                        alert("System is already deployed!");
+
+                    } else {
+
+                        console.log('Server: error deploying the system');
+
+                    }
+                }).fail(function (err) {
+
+                    $('#spinner-prompt .modal-content').html(`
+                        <div class="modal-header centered">
+                            <figure>
+                                <img src="/images/error.png">
+                            </figure>
+                        </div>
+
+                        <div class="modal-body centered">
+                            <p>There was a problem generating systems tests</p>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="navigateHome()">Continue</button>
+                        </div>
+                    `);
+
+                    if (err.status == '401') {
+                        alert('Unauthorized... ');
+                        window.location.replace('/home');
+                    } else {
+                        console.log('Server: error deploying the system');
+                    }
+                });
+
+        });
+
+        function navigateHome() {
+            window.location = '/home';
+        }
+    </script>

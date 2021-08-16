@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head><% include ../partials/head %></head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <header class="main-header"><% include ../partials/header %></header>
+        <aside class="main-sidebar"><% include ../partials/sidebar %></aside>
+
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+
+            <!--  This check needs to be here -JC-->
+            <% if(!validSession){ %>
+
+            <div class="modal fade" id="loginModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <img src="<%= config.logo_uri %>" />
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+
+                        <form class="form-login" id="form-login" action="/auth/login" method="POST" autocomplete="off">
+
+                            <div class="modal-body">
+                                <div id='badcreds' class="alert alert-danger form-group" hidden>
+                                    Incorrect Username or Password
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="username" id="username"
+                                        placeholder="Username" autocomplete="off" required />
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password" id="password"
+                                        placeholder="Password" autocomplete="off" required />
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <% } %>
+            <h3 style="padding-left: 10px;">Reporting</h3>
+            <div class="portal-links-container">
+                <div class="flex-row">
+
+                    <a class="portal-link" href="/reports/systemsAndTests">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">All Tests by System</div>
+                    </a>
+                    <a class="portal-link" href="/reports/cosaResults">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">COSA Results</div>
+                    </a>
+                    <a class="portal-link" href="/reports/cosaControlResults">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">COSA Control Results</div>
+                    </a>
+                    <a class="portal-link" href="/reports/cosaSubCapabilityResults">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">COSA Sub-Capability Results</div>
+                    </a>
+                    <a class="portal-link" href="/reports/trending">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">Trending Report</div>
+                    </a>
+                    <a class="portal-link" href="/reports/inheritance">
+                        <figure><img src="<%= config.icons.print %>"></figure>
+                        <div class="portal-label">Inheritence Report</div>
+                    </a>
+                </div>
+            </div>
+        </div><!-- content-wrapper -->
+        <% include ../partials/footer %>
+    </div><!-- ./wrapper -->
+
+    <script type="text/javascript">
+
+
+    </script>
+
+</body>
+
+</html>

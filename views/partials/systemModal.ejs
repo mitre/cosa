@@ -1,0 +1,129 @@
+<div class="modal fade" id="systemModal" tabindex="-1" role="dialog" aria-labelledby="systemModalLabel">
+    <div class="modal-dialog" style="width:60%" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="detailsModalLabel">System Details</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="systemForm">
+                    <table class="table">
+                        <tbody>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputName" class="control-label">System Name</label>
+                                        <input type="text" class="form-control" id="inputName" minlength="2" maxlength="50" required data-validation="length" data-validation-length="2-50"
+                                            placeholder="Enter system name">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputAdmin" class="control-label">System Admin</label>
+                                        <select class="form-control select2 select2-hidden-accesible" multiple="multiple" style="width: 100%" tabindex="1" aria-hidden="true" id="inputAdmins">
+                                            <% users.forEach(function(user) {  %>
+                                                <option value="<%= user.PK_USER_ID %>">
+                                                    <%= user.USER_NAME %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                        <div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputAcronym" class="control-label">System Acronym
+                                        </label>
+                                        <input type="text" class="form-control" id="inputAcronym" required maxlength="25" placeholder="Enter the system acronym">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputEvidenceApprover" class="control-label">System Evidence Approver</label>
+                                        <select class="form-control select2 select2-hidden-accesible" multiple="multiple" style="width: 100%" tabindex="1" aria-hidden="true" id="inputEvidenceApprovers">
+                                            <% users.forEach(function(user) {  %>
+                                                <option value="<%= user.PK_USER_ID %>">
+                                                    <%= user.USER_NAME %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputCategorization" class="control-label">System Categorization
+                                        </label>
+                                        <select class="form-control" style="width: 100%" tabindex="1" aria-hidden="true" id="inputCategorization">
+                                            <% categories.forEach(function(category) {  %>
+                                                <option value="<%= category.PK_CATEGORIZATION_ID %>">
+                                                    <%= category.NAME %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputEvidenceProvider" class="control-label">System Evidence Provider</label>
+                                        <select class="form-control select2 select2-hidden-accesible" multiple="multiple" style="width: 100%" tabindex="1" aria-hidden="true" id="inputEvidenceProviders">
+                                            <% users.forEach(function(user) {  %>
+                                                <option value="<%= user.PK_USER_ID %>">
+                                                    <%= user.USER_NAME %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputDescription" class="control-label">Description</label>
+                                        <textarea class="form-control" rows="5" id="inputDescription" required data-validation="length" data-validation-length="3-500"
+                                            maxlength="500" placeholder="Enter a description of this system"></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputUser" class="control-label">System User</label>
+                                        <select class="form-control select2 select2-hidden-accesible" multiple="multiple" style="width: 100%" tabindex="1" aria-hidden="true" id="inputUsers">
+                                            <% users.forEach(function(user) {  %>
+                                                <option value="<%= user.PK_USER_ID %>">
+                                                    <%= user.USER_NAME %>
+                                                </option>
+                                                <% }) %>
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr valign="top">
+                                <td>
+                                    <div class="form-group">
+                                        <label for="inputActive" class="control-label">Active</label>
+                                        <select class="form-control" style="width: 100%" tabindex="1" aria-hidden="true" id="inputActive">
+                                            <option value="0">No</option>
+                                            <option value="1">Yes</option>
+                                        </select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger" id='btnDeleteSystem'>Delete</button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                        <button type="button" class="btn btn-primary" id='btnCreateSystem'>Create System</button>
+                                        <button type="button" class="btn btn-primary" id='btnUpdateSystem'>Update</button>
+                                    </div> 
+                                </td>
+                            </tr> 
+                        </tbody>
+                    </table>
+                </form>
+                </div>
+                </div>
+            </div>
+        </div>

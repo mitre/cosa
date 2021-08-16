@@ -1,0 +1,70 @@
+<section id="wizard-sidebar" class="sidebar">
+    <ul class="sidebar-menu">
+
+        <!-- <li id="sidebar_home">
+            <a href="#" data-toggle="modal" data-target="#wizard-cancellation">Home</a>
+        </li> -->
+
+        <li id="sidebar_home">
+            <a href="#" onclick="navigateBack('home')">Home</a>
+        </li>
+
+    </ul>
+</section>
+
+<script type="text/javascript">
+    $( document ).ready(function() {
+
+        var view_list = [
+            {"addSystem": "System Information"},
+            {"catalog": "Catalog"},
+            {"inheritance": "Inheritance"},
+            {"componentsBasic": "Component Config"},
+            {"systemRoles": "System Roles Config"},
+            {"systemReview": "Add New System Review"},
+            {"componentConfig": "Component Configuration"},
+            {"testApplicability": "Test Applicability"}
+        ];
+
+        var wizard_completed = '<%= wizard_completed %>';
+        var current_view = window.location.pathname.split('/')[2];
+
+        // display all lower index list items; (pages that have been completed)
+        for (let i = 0; i < view_list.length; i++) {
+            var address = Object.keys(view_list[i])[0];
+            var display = view_list[i][address];
+
+            // add link to the sidebar
+            $('#wizard-sidebar ul').append(`
+                <li id="${address}-sidebar-link">
+                    <a href="/wizard/${address}">${display}</a>
+                </li>
+            `);
+
+            // style the active link
+            if(address == current_view) {
+                $(`#${address}-sidebar-link`).addClass('active');
+            }
+
+            if(wizard_completed.includes(address) || wizard_completed.includes('all')) {
+                $(`#${address}-sidebar-link`).show();
+            } else {
+                $(`#${address}-sidebar-link`).hide();
+            }
+        }
+
+        // hide sidebar links until system is selected
+        if(current_view == "manageSystem") $('#sidebar_home').siblings().css('display', 'none');
+
+    });
+
+    function navigateBack(view) {
+
+        if(view == "home") {
+            window.location = '/home';
+        } else {
+            window.location = '/wizard/' + view;
+        }
+    }
+
+</script>

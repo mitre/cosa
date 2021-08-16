@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!--
+   Copyright 2021 The MITRE Corporation
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+
+<head>
+    <% include ../../partials/head %>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+
+    <header class="main-header"><% include ../../partials/header %></header>
+    <aside class="main-sidebar"><% include ../../partials/wizardSidebar %></aside>
+    <% include ../../partials/wizardCancellationModal %>
+
+    <div class="wizard-container">
+        <% include ../../partials/wizardProgressSteps %>
+        <div class="wizard-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h3>System Information</h3>
+            <p>Enter the requested information. This information can be reviewed and updated later.</p>
+          </div>
+
+        <div class="wizard-window">
+            <form id="system-form">
+
+                <div class="form-group">
+                    <label for="system-name" class="required">System Name</label>
+                    <input type="text" class="form-control" id="system-name" placeholder="Enter the name of the system to be assessed in COSA" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="system-acronym" class="required">System Acronym</label>
+                    <input type="text" class="form-control" id="system-acronym" placeholder="Enter the acronym of the system to be assessed in COSA"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sys-cat-select" class="required">FISMA System Categorization</label>
+                    <select class="form-control" id="sys-cat-select">
+
+                        <% categorizations.forEach(cat => { %>
+                        <option value="<%= cat.PK_CATEGORIZATION_ID %>"><%= cat.NAME %></option>
+                        <% }); %>
+
+                    </select>
+                </div>
+
+                <div class="form-group">
+
+                <!-- When we're ready to allow colning of systems. 
+                    <div>
+                        <input type="radio" id="templateLoadType" onclick="javascript:loadTypeChange();" name="loadType"
+                            value="template" checked>
+                        <label for="templateLoadType">Template</label>
+                        <input type="radio" id="cloneLoadType" onclick="javascript:loadTypeChange();" name="loadType" value="clone">
+                        <label for="cloneLoadType">System Clone</label>
+                    </div>
+                -->
+                    <div id="ifTemplate" style="display:block">
+                        <label for="sys-template-select" class="required">Template</label>
+                        <select class="form-control" id="sys-template-select">
+                            <% template_list.forEach(temp => { %>
+                            <option value="<%= temp.PK_TEMPLATE_DEFAULT_ID %>"><%= temp.NAME %></option>
+                            <% }); %>
+
+                        </select>
+                    </div>
+                   
+                    <div id="ifClone" style="display:none">
+                        <select class="form-control" id="sys-system-select">
+                            <% system_list.forEach(temp => { %>
+                            <option value="<%= temp.PK_SYSTEM_ID %>"><%= temp.NAME %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                </div>
+                <!-- Remove High Value Asset for now. It's not being used in COSA and exists in another system of record today.****
+                <div id="hva-container" class="form-check">
+                    <input type="checkbox" class="form-check-input" id="sys-hv-asset" value="checked">
+                    <label class="form-check-label" for="sys-hv-asset">High Value Asset</label>
+                </div> **** -->
+
+                <div class="form-group">
+                    <label for="system-description" class="required">Description</label>
+                    <textarea class="form-control" id="system-description" rows="3" placeholder="Enter description of the system to be assessed in COSA" required></textarea>
+                </div>
+
+                <div class="form-nav-buttons">
+                    <button type="button" class="btn btn-primary" data-toggle="modal"
+                        data-target="#wizard-cancellation">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Next</button>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+    <% include ../../partials/footer %>
+
+    <script type="text/javascript" async="true">
+
+        $(document).ready(function () {
+            $("#wizardProgressBar  > li:lt(1)").addClass("active");
+
+            var system = {};
+            var form = $('#system-form');
+            $('#sys-cat-select').val(2); //makes MODERATE the default
+
+            <% if (systemConfig != null) { %>
+
+                $('#system-name').val('<%= systemConfig[0].NAME%>');
+                $('#system-acronym').val('<%= systemConfig[0].ACRONYM%>');
+                $('#sys-cat-select').val('<%= systemConfig[0].FK_CATEGORIZATION_ID%>');
+                $('#system-description').val('<%= systemConfig[0].DESCRIPTION%>');
+                $('#sys-hv-asset').prop('checked', ('<%= systemConfig[0].HIGH_VALUE_ASSET%>' == 1) ? true : false);
+
+                system.id = <%=systemConfig[0].PK_SYSTEM_ID %>;
+
+            <% } %>
+
+                //form.validate();
+
+                form.submit(function (e) {
+                    e.preventDefault();
+
+                    if (form.valid()) {
+
+                        system.name = $('#system-name').val();
+                        system.acronym = removeSpacesFromString($('#system-acronym').val());
+                        system.cat = $('#sys-cat-select').val();
+                        system.hva = $('#sys-hv-asset').is(':checked') ? 1 : 0;
+                        system.template = $('#sys-template-select').val();
+                        system.desc = $('#system-description').val();
+
+                        $.post('/systemInfoNext/systemInfoNext', system, function (data) {
+
+                            console.log(JSON.stringify(data));
+
+                            if (data.message == 'Success') {
+                                console.log('Records inserted = ' + data.affectedRows);
+                                system.id = data.systemId;
+                                console.log(system.id);
+
+                                window.location = '/wizard/catalog?systemId=' + system.id + '&templateId=' + system.template + '&systemName=' + system.name;
+
+                            } else {
+                                console.log('Server: error sending form');
+                                console.log(data);
+                            }
+                        });
+
+                    } else {
+                        console.log('form incomplete');
+                    }
+                });
+
+            function removeSpacesFromString(strVal) {
+                strVal = strVal.replace(/ /g, '');
+                //alert("adjusted string= "+strVal);
+                return strVal;
+            }
+
+        });
+
+        function loadTypeChange() {
+            
+            if (document.getElementById('templateLoadType').checked) {
+                document.getElementById('ifTemplate').style.display = 'block';
+                document.getElementById('ifClone').style.display = 'none';
+            } else {
+                document.getElementById('ifTemplate').style.display = 'none';
+                document.getElementById('ifClone').style.display = 'block';
+            }
+        }
+
+
+    $(document).ready(function () {
+        $(".required").after("<span class='red'>*</span>");;
+    });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<div id="workitemstablediv" class="box-body table-responsive">
+    <table id="workitemstable" class="table table-bordered table-hover" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th class="text">Information System Name</th>
+                <th class="text">Categorization</th>
+                <th class="text">Control Item</th>
+                <th class="text">Control Title</th>
+                <th class="text">Role</th>
+                <th class="text">Work Item Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% workitems.forEach(function(workitem) {  %>
+                <tr id="<%= workitem.PK_WORK_ITEM_RESULT_ID %>">
+                    <td>
+                        <%= workitem.SYSTEM %>
+                    </td>
+                    <td>
+                        <%= workitem.CATEGORIZATION %>
+                    </td>
+                    <td>
+                        <%= workitem.CONTROL_ITEM %>
+                    </td>
+                    <td>
+                        <%= workitem.TITLE %>
+                    </td>
+                    <td>
+                        <%= workitem.ROLE_NAME %>
+                    </td>
+                    <td>
+                        <%= workitem.STATUS %>
+                    </td>
+                </tr>
+
+                <% }) %>
+        </tbody>
+    </table>
+</div>

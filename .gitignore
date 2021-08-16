@@ -1,0 +1,17 @@
+# ignore modules folder
+node_modules/
+logs/
+
+# ignore attachmants folder
+attachments/*
+
+# ignore bower "CSS" folder
+public/bower_components/
+# ignore bower "CSS" folder
+public/assets/
+
+
+#ignore all of these files
+.DS_Store
+
+reports/

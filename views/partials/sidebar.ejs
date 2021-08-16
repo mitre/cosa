@@ -1,0 +1,104 @@
+<!-- sidebar -->
+<section class="sidebar">
+  <ul class="sidebar-menu">
+
+    <li id="sidebar_home">
+      <a href="/home"><i class="fas fa-tachometer-alt"></i> Home</a>
+    </li>
+
+    <% if (validSession) { %>
+
+      <li id="sidebar_dashboard">
+        <a href="/dashboard">
+          <i class="fa fa-circle text-aqua"></i> Dashboard</a>
+      </li>
+      <li id="sidebar_my_systems">
+        <a href="/mySystems">
+          <i class="fa fa-circle text-aqua"></i> My Systems</a>
+      </li>
+      <li id="sidebar_my_workitems">
+        <a href="/workitems/myworkitems">
+          <i class="fa fa-circle text-aqua"></i> Pending Work Items</a>
+      </li>
+      <li id="sidebar_my_exports">
+        <a href="/exports">
+          <i class="fa fa-circle text-aqua"></i> Export Findings</a>
+      </li>
+      <li id="sidebar_acceptable_risk_safeguards">
+        <a href="/secControl/controls">
+          <i class="fa fa-circle text-aqua"></i> Security Controls</a>
+      </li>
+      
+    <% } %>
+
+    <% if (validSession) { %>
+      <% if (role == 'Admin') { %>
+        <li>
+
+          <a href="#sidebar-collapse" data-toggle="collapse" >
+            <i class="fa fa-lock"></i>
+            <span>Administrator</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+
+          <ul id="sidebar-collapse" class="collapse">
+
+            <li id="my_Audits">
+              <a href="/audit/auditreport">Audit Report</a>
+            </li>
+
+            <li id="configView">
+              <a href="/config/configreport">Configuration Report</a>
+            </li>
+
+           <!-- <li id="admin_demo">
+              <a href="/system/demo">Demo Management</a>
+            </li>
+          -->
+            <li id="HybridValidationReports">
+              <a href="/validate/validatehybridtestsreport">Hybrid Validation Report</a>
+            </li>
+            
+            <li id="init_cosa">
+              <a href="/initCOSA">Initialize COSA</a>
+            </li>
+
+            <li id="admin_logs">
+              <a href="/system/logview">Log Viewer</a>
+            </li>
+
+            <li id="admin_tests">
+              <a href="/testsets/procedures">Procedure Management</a>
+            </li>
+
+            <li id="admin_manageSystems">
+              <a href="/system/manageSystems">System Management</a>
+            </li>
+
+            <li id="system_select">
+              <a href="/testsets/systemselect">Test Management</a>
+            </li>
+
+            <li id="my_ValidationReports">
+              <a href="/validate/validatetestsreport">Test Validation Report</a>
+            </li>
+
+            <li id="admin_users">
+              <a href="/auth/users"><span> User Management</span></a>
+            </li>
+
+            <li id="admin_work_items">
+              <a href="/workitems/workitems">Work Item Management</a>
+            </li>
+
+            <% } else { %>
+              <!-- invalid session menu options -->
+            <% } %>
+        </ul>
+      </li>
+    <% } %>
+  </ul> <!-- sidebar menu -->
+
+</section>
