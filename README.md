@@ -11,19 +11,21 @@ It has many features:
 
 1. You can put COSA into a Jenkins pipeline (or any other CI/CD pipeline) to handle the automated scans.
 1. COSA will orchestrate manual, automated, and inherited control tests automatically.
-1. Each Test has a Result and that Result expires eventually, according to the Test.  This means COSA won't pester you
-to answer manual tests (too often).
 1. Multiple Systems can be managed by a single instance of COSA
-1. Each system has its own tests.
-1. A Control can have multiple tests (as few or many as the test authors deem necessary). 
-1. A CSV file contains all tests (and can be worked-on using a spreadsheet program or text editor)
-1. tests can be manual, automated, or inherited from another system
+
+The data domain (capitalized words) is described as follows:
+1. Each System is subject to a set of Controls, each set of which comes from a Control Catalog.
+1. A Control can have multiple Tests (as few or many as the test authors deem necessary). 
+1. Each Test has a Test Result and that Test Result expires eventually, according to the Test.  This means COSA won't pester you
+to answer manual Tests (too often).
+1. A CSV file contains all Tests (and can be worked-on easily using a spreadsheet program or text editor)
+1. Tests can be manual, automated, or inherited (meaning the Test Results will come from the independent assessment of another system)
 1. A Wizard can help you set-up your first System.
 1. The Wizard can create an initial set of tests for a given system using the organization's own standard set.
 1. The Wizard can also use pre-defined profiles to pre-populate the new system's tests from product and/or service
 specific tests.  So you can have tests predefined for Apache, or NGINX, or MySQL (just as examples).
-1. The COSA control catalog can be customized. By default, it is populated with the NIST SP-800-53R4 set of tests.
-1. You can have multiple test catalogs. So, for example, you can have tests to check for compliance with Section 508. You can have tests for your organization.
+1. The COSA Control Catalog can be customized. By default, it is populated with the NIST SP-800-53 R4 set of Controls.
+1. You can have multiple Control Catalogs. So, for example, you can have tests to check for compliance with Section 508. You can have tests for your organization.
 1. All data is stored in a MySQL relational database, including attachments. No file storage is used.
 1. Attachments can be optionally virus scanned by ClamAV  (this is configurable)
 1. Runs on Windows or Linux or MacOS/X
